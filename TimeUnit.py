@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time    : 2017/11/20 17:01
 # @Author  : zhm

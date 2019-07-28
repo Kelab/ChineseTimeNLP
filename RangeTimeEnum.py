@@ -1,10 +1,8 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time    : 2017/11/20 16:27
 # @Author  : zhm
 # @File    : RangeTimeEnum.py
 # @Software: PyCharm
-
 
 
 # 范围时间的默认时间点

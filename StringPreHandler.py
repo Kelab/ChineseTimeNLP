@@ -1,10 +1,10 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time    : 2017/11/20 15:42
 # @Author  : zhm
 # @File    : StringPreHandler.py
 # @Software: PyCharm
 import regex as re
+
 
 # * 字符串预处理模块，为分析器TimeNormalizer提供相应的字符串预处理服务
 class StringPreHandler:
@@ -22,7 +22,6 @@ class StringPreHandler:
         # print res
         return res
 
-
     @classmethod
     def numberTranslator(cls, target):
         """
@@ -38,7 +37,8 @@ class StringPreHandler:
         :param target: 待转化的字符串
         :return: 转化完毕后的字符串
         """
-        pattern = re.compile(u"[一二两三四五六七八九123456789]万[一二两三四五六七八九123456789](?!(千|百|十))")
+        pattern = re.compile(
+            u"[一二两三四五六七八九123456789]万[一二两三四五六七八九123456789](?!(千|百|十))")
         match = pattern.finditer(target)
         for m in match:
             group = m.group()
@@ -46,10 +46,12 @@ class StringPreHandler:
             s = list(filter(None, s))
             num = 0
             if len(s) == 2:
-                num += cls.wordToNumber(s[0]) * 10000 + cls.wordToNumber(s[1]) * 1000
+                num += cls.wordToNumber(s[0]) * 10000 + cls.wordToNumber(
+                    s[1]) * 1000
             target = pattern.sub(str(num), target, 1)
 
-        pattern = re.compile(u"[一二两三四五六七八九123456789]千[一二两三四五六七八九123456789](?!(百|十))")
+        pattern = re.compile(
+            u"[一二两三四五六七八九123456789]千[一二两三四五六七八九123456789](?!(百|十))")
         match = pattern.finditer(target)
         for m in match:
             group = m.group()
@@ -57,10 +59,12 @@ class StringPreHandler:
             s = list(filter(None, s))
             num = 0
             if len(s) == 2:
-                num += cls.wordToNumber(s[0]) * 1000 + cls.wordToNumber(s[1]) * 100
+                num += cls.wordToNumber(s[0]) * 1000 + cls.wordToNumber(
+                    s[1]) * 100
             target = pattern.sub(str(num), target, 1)
 
-        pattern = re.compile(u"[一二两三四五六七八九123456789]百[一二两三四五六七八九123456789](?!十)")
+        pattern = re.compile(
+            u"[一二两三四五六七八九123456789]百[一二两三四五六七八九123456789](?!十)")
         match = pattern.finditer(target)
         for m in match:
             group = m.group()
@@ -68,7 +72,8 @@ class StringPreHandler:
             s = list(filter(None, s))
             num = 0
             if len(s) == 2:
-                num += cls.wordToNumber(s[0]) * 100 + cls.wordToNumber(s[1]) * 10
+                num += cls.wordToNumber(s[0]) * 100 + cls.wordToNumber(
+                    s[1]) * 10
             target = pattern.sub(str(num), target, 1)
 
         pattern = re.compile(u"[零一二两三四五六七八九]")
@@ -165,7 +170,8 @@ class StringPreHandler:
             return 5
         elif (s == u'六') or (s == '6'):
             return 6
-        elif (s == u'七') or (s == u'天') or (s == u'日') or (s == u'末') or (s == '7'):
+        elif (s == u'七') or (s == u'天') or (s == u'日') or (s == u'末') or (
+                s == '7'):
             return 7
         elif (s == u'八') or (s == '8'):
             return 8
