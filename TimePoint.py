@@ -6,3 +6,6 @@ class TimePoint:
     '''
     def __init__(self):
         self.tunit = [-1, -1, -1, -1, -1, -1]
+
+    def __repr__(self):
+        return str(self.tunit)
