@@ -3,11 +3,11 @@ import regex as re
 import arrow
 import json
 import os
-from log import NLP_LOGGER
+from .log import NLP_LOGGER
 
-from StringPreHandler import StringPreHandler
-from TimePoint import TimePoint
-from TimeUnit import TimeUnit
+from .StringPreHandler import StringPreHandler
+from .TimePoint import TimePoint
+from .TimeUnit import TimeUnit
 
 
 # 时间表达式识别的主要工作类

@@ -1,4 +1,4 @@
-from TimeNormalizer import TimeNormalizer  # 引入包
+from time_converter import TimeNormalizer  # 引入包
 
 tn = TimeNormalizer(isPreferFuture=False)
 

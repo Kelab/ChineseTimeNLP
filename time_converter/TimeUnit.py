@@ -1,14 +1,14 @@
-from log import NLP_LOGGER
+from .log import NLP_LOGGER
 import regex as re
 import arrow
 import copy
-from TimePoint import TimePoint
-from RangeTimeEnum import RangeTimeEnum
+from .TimePoint import TimePoint
+from .RangeTimeEnum import RangeTimeEnum
 
 try:
-    from LunarSolarConverter.LunarSolarConverter import *
+    from .LunarSolarConverter.LunarSolarConverter import *
 except Exception:
-    from LunarSolarConverter import *
+    from .LunarSolarConverter import *
 
 
 # 时间语句分析
