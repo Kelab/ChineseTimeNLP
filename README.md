@@ -8,12 +8,16 @@ fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为�
 # @Software: PyCharm
 # @Changed : tianyuningmou
 ```
-感谢 zhm
+感谢作者。
 
 ## 简介
-Time-NLP的python3版本   
-python 版本https://github.com/sunfiyes/Time-NLPY  
-Java 版本https://github.com/shinyke/Time-NLP
+这是 Time-NLP 的 Python3 版本。  
+相关链接：
+- Python 版本 https://github.com/sunfiyes/Time-NLPY  
+- Python2 版本 https://github.com/ryanInf/Time-NLPY/tree/Python2%E7%89%88%E6%9C%AC
+- Python3 版本 https://github.com/ryanInf/Time-NLPY/
+- Java 版本 https://github.com/shinyke/Time-NLP
+
 ## 配置
 ```py
 TimeNormalizer(isPreferFuture=True):

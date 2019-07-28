@@ -137,7 +137,7 @@ class TimeNormalizer:
                     res[0].time.format("YYYY-MM-DD HH:mm:ss"),
                     res[1].time.format("YYYY-MM-DD HH:mm:ss")
                 ]
-        return json.dumps(dic)
+        return dic
 
     def __preHandling(self):
         """

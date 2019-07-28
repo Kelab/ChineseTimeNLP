@@ -6,6 +6,10 @@ res = tn.parse(target=u'星期天晚上')  # target为待分析语句，timeBase
 print(res)
 print('====')
 
+res = tn.parse(target=u'八月十五号晚上我有什么课')  # target为待分析语句，timeBase为基准时间默认是当前时间
+print(res)
+print('====')
+
 res = tn.parse(target=u'晚上8点到上午10点之间')  # target为待分析语句，timeBase为基准时间默认是当前时间
 print(res)
 print('====')

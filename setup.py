@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="TimeConverter",
-      version="1.1.0",
+      version="1.1.1",
       keywords=("time", "nlp"),
       description="...",
       long_description="...",
