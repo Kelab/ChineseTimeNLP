@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2017/12/5 15:10
-# @Author  : zhm
-# @File    : setup.py.py
-# @Software: PyCharm
-# @Changed : tianyuningmou
-
 from setuptools import setup
 
 setup(name="TimeConverter",

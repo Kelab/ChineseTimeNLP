@@ -1,3 +1,15 @@
+## 声明
+fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下：
+```
+# -*- coding: utf-8 -*-
+# @Time    : 2017/11/20 17:01
+# @Author  : zhm
+# @File    : TimeUnit.py
+# @Software: PyCharm
+# @Changed : tianyuningmou
+```
+感谢 zhm
+
 ## 简介
 Time-NLP的python3版本   
 python 版本https://github.com/sunfiyes/Time-NLPY  
@@ -30,7 +42,7 @@ python setup.py bdist_wheel
 
 ## 功能说明
 用于句子中时间词的抽取和转换  
-详情请见test.py
+详情请见 `Test.py`
 ```py
 
 tn = TimeNormalizer(isPreferFuture=False)
@@ -144,8 +156,7 @@ temp []
 ====
 ```
 ## 使用方式 
-demo：python3 Test.py
-
+见 `Test.py`
 
 ## TODO
 

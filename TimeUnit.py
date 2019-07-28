@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2017/11/20 17:01
-# @Author  : zhm
-# @File    : TimeUnit.py
-# @Software: PyCharm
-# @Changed : tianyuningmou
+
 
 
 import regex as re
