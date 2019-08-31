@@ -2,7 +2,11 @@ from time_converter import TimeNormalizer  # 引入包
 
 tn = TimeNormalizer(isPreferFuture=False)
 
-res = tn.parse(target=u'星期天晚上')  # target为待分析语句，timeBase为基准时间默认是当前时间
+res = tn.parse(target=u'下周五我有什么课')  # target为待分析语句，timeBase为基准时间默认是当前时间
+print(res)
+print('====\n')
+
+res = tn.parse(target=u'星期日我有什么课')  # target为待分析语句，timeBase为基准时间默认是当前时间
 print(res)
 print('====\n')
 

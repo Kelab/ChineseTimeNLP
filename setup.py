@@ -15,7 +15,7 @@ setup(name="time_converter",
           ['resource/*.json', 'resource/*.pkl', 'resource/*.txt']
       },
       include_package_data=True,
-      install_requires=['regex>=2017', 'arrow>=0.10'],
+      install_requires=['regex>=2017', 'arrow==0.14.0'],
       zip_safe=False,
       classifiers=[
           'Programming Language :: Python :: 2.6',

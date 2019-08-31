@@ -181,7 +181,7 @@ class TimeUnit:
             matchStr = match.group()
             p = re.compile(u"(月|\\.|\\-)")
             m = p.search(matchStr)
-            if match is not None:
+            if m is not None:
                 splitIndex = m.start()
                 month = matchStr[0: splitIndex]
                 day = matchStr[splitIndex + 1:]
@@ -730,6 +730,7 @@ class TimeUnit:
         :return:
         """
         # 这一块还是用了断言表达式
+        print(self.normalizer.timeBase)
         cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
         flag = [False, False, False]
 
