@@ -2,7 +2,7 @@ from setuptools import setup
 import setuptools
 
 setup(name="time_converter",
-      version="1.1.4",
+      version="1.1.5",
       keywords=("time", "nlp"),
       author="BuddingLab",
       author_email="lengthmin@gmail.com",
@@ -17,8 +17,4 @@ setup(name="time_converter",
       include_package_data=True,
       install_requires=['regex>=2017', 'arrow==0.14.0'],
       zip_safe=False,
-      classifiers=[
-          'Programming Language :: Python :: 2.6',
-          'Programming Language :: Python :: 2.7',
-          'Programming Language :: Python :: 3.6'
-      ])
+      classifiers=['Programming Language :: Python :: 3.6'])
