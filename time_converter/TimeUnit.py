@@ -1,14 +1,10 @@
-from .log import NLP_LOGGER
+from .log import Time_NLP_LOGGER
 import regex as re
 import arrow
 import copy
 from .TimePoint import TimePoint
 from .RangeTimeEnum import RangeTimeEnum
-
-try:
-    from .LunarSolarConverter.LunarSolarConverter import *
-except Exception:
-    from .LunarSolarConverter import *
+from .LunarSolarConverter import Lunar, LunarSolarConverter
 
 
 # 时间语句分析
@@ -18,15 +14,15 @@ class TimeUnit:
         exp_time: 时间表达式
         normalizer: TimeNormalizer 类
         '''
+        Time_NLP_LOGGER.debug(f'TimeUnit Init: {exp_time} {contextTp}')
         self._noyear = False
         self.exp_time = exp_time
         self.normalizer = normalizer
         self.tp = TimePoint()
         self.tp_origin = contextTp
-        NLP_LOGGER.debug(f'TimeUnit: {exp_time} {contextTp}')
         self.isFirstTimeSolveContext = True
         self.isAllDayTime = True
-        self.time = arrow.now()
+        self.time = arrow.now('Asia/Shanghai')
         self.time_normalization()
 
     def __repr__(self):
@@ -50,7 +46,7 @@ class TimeUnit:
         self.norm_setHoliday()
         self.modifyTimeBase()
         self.tp_origin.tunit = copy.deepcopy(self.tp.tunit)
-        NLP_LOGGER.debug(f'self.tp {self.tp}')
+        Time_NLP_LOGGER.debug(f'self.tp {self.tp}')
         # 判断是时间点还是时间区间
         flag = True
         for i in range(0, 4):
@@ -60,9 +56,9 @@ class TimeUnit:
             self.normalizer.isTimeSpan = True
 
         if self.normalizer.isTimeSpan:
-            NLP_LOGGER.debug('判断是时间段')
+            Time_NLP_LOGGER.debug('判断是时间段')
         else:
-            NLP_LOGGER.debug('判断是时间点')
+            Time_NLP_LOGGER.debug('判断是时间点')
 
         if self.normalizer.isTimeSpan:
             days = 0
@@ -80,7 +76,7 @@ class TimeUnit:
             if seconds == 0 and days == 0:
                 self.normalizer.invalidSpan = True
             self.normalizer.timeSpan = self.genSpan(days, seconds)
-            NLP_LOGGER.debug(f'时间段: {self.normalizer.timeSpan}')
+            Time_NLP_LOGGER.debug(f'时间段: {self.normalizer.timeSpan}')
             return
 
         time_grid = self.normalizer.timeBase.split('-')
@@ -92,7 +88,7 @@ class TimeUnit:
                 self.tp.tunit[i] = int(time_grid[i])
 
         self.time = self.genTime(self.tp.tunit)
-        NLP_LOGGER.debug(f'时间点: {self.time}')
+        Time_NLP_LOGGER.debug(f'时间点: {self.time}')
 
     def genSpan(self, days, seconds):
         day = int(seconds / (3600 * 24))
@@ -213,21 +209,7 @@ class TimeUnit:
             self.tp.tunit[2] = int(match.group())
             self._check_time(self.tp.tunit)
 
-
-    def norm_sethour(self):
-        """
-        时-规范化方法：该方法识别时间表达式单元的时字段
-        :return:
-        """
-        rule = u"(?<!(周|星期))([0-2]?[0-9])(?=(点|时))"
-        pattern = re.compile(rule)
-        match = pattern.search(self.exp_time)
-        if match is not None:
-            self.tp.tunit[3] = int(match.group())
-            # 处理倾向于未来时间的情况
-            self.preferFuture(3)
-            self.isAllDayTime = False
-
+    def norm_checkKeyword(self):
         # * 对关键字：早（包含早上/早晨/早间），上午，中午,午间,下午,午后,晚上,傍晚,晚间,晚,pm,PM的正确时间计算
         # * 规约：
         # * 1.中午/午间0-10点视为12-22点
@@ -313,6 +295,24 @@ class TimeUnit:
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
+
+    def norm_sethour(self):
+        """
+        时-规范化方法：该方法识别时间表达式单元的时字段
+        :return:
+        """
+        rule = u"(?<!(周|星期))([0-2]?[0-9])(?=(点|时))"
+        pattern = re.compile(rule)
+        match = pattern.search(self.exp_time)
+        if match is not None:
+            self.tp.tunit[3] = int(match.group())
+            # print('first', self.tp.tunit[3] )
+            self.norm_checkKeyword()
+            # 处理倾向于未来时间的情况
+            self.preferFuture(3)
+            self.isAllDayTime = False
+        else:
+            self.norm_checkKeyword()
 
     def norm_setminute(self):
         """
@@ -523,7 +523,7 @@ class TimeUnit:
         设置以上文时间为基准的时间偏移计算
         :return:
         """
-        NLP_LOGGER.debug(f'设置以上文时间为基准的时间偏移计算: {self.exp_time}')
+        Time_NLP_LOGGER.debug(f'设置以上文时间为基准的时间偏移计算: {self.exp_time}')
         cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
         flag = [False, False, False]
 
@@ -730,7 +730,6 @@ class TimeUnit:
         :return:
         """
         # 这一块还是用了断言表达式
-        print(self.normalizer.timeBase)
         cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
         flag = [False, False, False]
 
@@ -867,7 +866,7 @@ class TimeUnit:
             rule = u"上"
             pattern = re.compile(rule)
             match = pattern.findall(self.exp_time)
-            cur = cur.replace(weeks=-len(match), days=span)
+            cur = cur.shift(weeks=-len(match), days=span)
 
         rule = u"(?<=((?<!上)上(周|星期)))[1-7]?"
         pattern = re.compile(rule)
@@ -880,7 +879,7 @@ class TimeUnit:
                 week = 1
             week -= 1
             span = week - cur.weekday()
-            cur = cur.replace(weeks=-1, days=span)
+            cur = cur.shift(weeks=-1, days=span)
 
         rule = u"(?<=((?<!下)下(周|星期)))[1-7]?"
         pattern = re.compile(rule)
@@ -893,7 +892,9 @@ class TimeUnit:
                 week = 1
             week -= 1
             span = week - cur.weekday()
-            cur = cur.replace(weeks=1, days=span)
+            Time_NLP_LOGGER.info(cur)
+
+            cur = cur.shift(weeks=1, days=span)
 
         # 这里对下下下周的时间转换做出了改善
         rule = u"(?<=(下*下下(周|星期)))[1-7]?"
@@ -910,7 +911,7 @@ class TimeUnit:
             rule = u"下"
             pattern = re.compile(rule)
             match = pattern.findall(self.exp_time)
-            cur = cur.replace(weeks=len(match), days=span)
+            cur = cur.shift(weeks=len(match), days=span)
 
         rule = u"(?<=((?<!(上|下|个|[0-9]))(周|星期)))[1-7]"
         pattern = re.compile(rule)
@@ -923,7 +924,7 @@ class TimeUnit:
                 week = 1
             week -= 1
             span = week - cur.weekday()
-            cur = cur.replace(days=span)
+            cur = cur.shift(days=span)
             # 处理未来时间
             cur = self.preferFutureWeek(week, cur)
 
@@ -994,8 +995,8 @@ class TimeUnit:
         time_arr = self.normalizer.timeBase.split('-')
         cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
         cur_unit = int(time_arr[checkTimeIndex])
-        NLP_LOGGER.debug(time_arr)
-        NLP_LOGGER.debug(self.tp.tunit)
+        Time_NLP_LOGGER.debug(time_arr)
+        Time_NLP_LOGGER.debug(self.tp.tunit)
         if self.tp.tunit[0] == -1:
             self._noyear = True
         else:
@@ -1022,8 +1023,8 @@ class TimeUnit:
         time_arr = self.normalizer.timeBase.split('-')
         if self._noyear:
             # check the month
-            NLP_LOGGER.debug(parse)
-            NLP_LOGGER.debug(time_arr)
+            Time_NLP_LOGGER.debug(parse)
+            Time_NLP_LOGGER.debug(time_arr)
             if parse[1] == int(time_arr[1]):
                 if parse[2] > int(time_arr[2]):
                     parse[0] = parse[0] - 1

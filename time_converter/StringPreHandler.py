@@ -14,7 +14,6 @@ class StringPreHandler:
         """
         pattern = re.compile(rules)
         res = pattern.sub('', target)
-        # print res
         return res
 
     @classmethod
@@ -179,6 +178,6 @@ class StringPreHandler:
     def strToInt(cls, s):
         try:
             res = int(s)
-        except:
+        except Exception:
             res = 0
         return res

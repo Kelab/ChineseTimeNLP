@@ -1,5 +1,6 @@
 from time_converter import TimeNormalizer  # 引入包
-
+from time_converter.log import Time_NLP_LOGGER
+Time_NLP_LOGGER.setLevel(10)
 tn = TimeNormalizer(isPreferFuture=False)
 
 res = tn.parse(target=u'下周五我有什么课')  # target为待分析语句，timeBase为基准时间默认是当前时间

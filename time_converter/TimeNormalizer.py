@@ -3,7 +3,7 @@ import regex as re
 import arrow
 import json
 import os
-from .log import NLP_LOGGER
+from .log import Time_NLP_LOGGER
 
 from .StringPreHandler import StringPreHandler
 from .TimePoint import TimePoint
@@ -50,7 +50,7 @@ class TimeNormalizer:
         input_query = input_query.replace('五一', '劳动节')
         input_query = input_query.replace('白天', '早上')
         input_query = input_query.replace('：', ':')
-        NLP_LOGGER.debug(f'对一些不规范的表达做转换 {input_query}')
+        Time_NLP_LOGGER.debug(f'对一些不规范的表达做转换 {input_query}')
         return input_query
 
     def init(self):
@@ -79,14 +79,14 @@ class TimeNormalizer:
             holi_lunar = json.load(f)
         return pattern, holi_solar, holi_lunar
 
-    def parse(self, target, timeBase=arrow.now()):
+    def parse(self, target, timeBase=arrow.now('Asia/Shanghai')):
         """
         TimeNormalizer的构造方法，timeBase取默认的系统当前时间
         :param timeBase: 基准时间点
         :param target: 待分析字符串
         :return: 时间单元数组
         """
-        NLP_LOGGER.debug(f"目标字符串: {target}")
+        Time_NLP_LOGGER.debug(f"目标字符串: {target}")
         self.isTimeSpan = False
         self.invalidSpan = False
         self.timeSpan = ''
@@ -108,7 +108,7 @@ class TimeNormalizer:
                 result = {}
                 dic['type'] = 'timedelta'
                 dic['timedelta'] = self.timeSpan
-                NLP_LOGGER.debug(f"timedelta: {dic['timedelta']}")
+                Time_NLP_LOGGER.debug(f"timedelta: {dic['timedelta']}")
                 index = dic['timedelta'].find('days')
 
                 days = int(dic['timedelta'][:index - 1])
@@ -148,7 +148,7 @@ class TimeNormalizer:
         self.target = StringPreHandler.delKeyword(self.target,
                                                   u"[的]+")  # 清理语气助词
         self.target = StringPreHandler.numberTranslator(self.target)  # 大写数字转化
-        NLP_LOGGER.debug(f'清理空白符和语气助词以及大写数字转化的预处理 {self.target}')
+        Time_NLP_LOGGER.debug(f'清理空白符和语气助词以及大写数字转化的预处理 {self.target}')
 
     def __timeEx(self):
         """
@@ -162,10 +162,10 @@ class TimeNormalizer:
         temp = []
 
         match = self.pattern.finditer(self.target)
-        NLP_LOGGER.debug('=======')
-        NLP_LOGGER.debug('用正则提取关键字：')
+        Time_NLP_LOGGER.debug('=======')
+        Time_NLP_LOGGER.debug('用正则提取关键字：')
         for m in match:
-            NLP_LOGGER.debug(m)
+            Time_NLP_LOGGER.debug(m)
             startline = m.start()
             if startline == endline:
                 rpointer -= 1
@@ -174,20 +174,20 @@ class TimeNormalizer:
                 temp.append(m.group())
             endline = m.end()
             rpointer += 1
-        NLP_LOGGER.debug('=======')
+        Time_NLP_LOGGER.debug('=======')
 
         res = []
         # 时间上下文： 前一个识别出来的时间会是下一个时间的上下文，用于处理：周六3点到5点这样的多个时间的识别，第二个5点应识别到是周六的。
         contextTp = TimePoint()
-        NLP_LOGGER.debug(f"基础时间 {self.timeBase}")
-        NLP_LOGGER.debug(f'待处理的字段: {temp}')
+        Time_NLP_LOGGER.debug(f"基础时间 {self.timeBase}")
+        Time_NLP_LOGGER.debug(f'待处理的字段: {temp}')
         for i in range(0, rpointer):
             # 这里是一个类嵌套了一个类
             res.append(TimeUnit(temp[i], self, contextTp))
             # res[i].tp.tunit[3] = -1
             contextTp = res[i].tp
 
-        NLP_LOGGER.debug(f'时间表达式类型数组 {res}')
+        Time_NLP_LOGGER.debug(f'时间表达式类型数组 {res}')
         res = self.__filterTimeUnit(res)
         return res
 
@@ -203,5 +203,5 @@ class TimeNormalizer:
         for tu in tu_arr:
             if tu.time.timestamp != 0:
                 res.append(tu)
-        NLP_LOGGER.debug(f'过滤timeUnit中无用的识别词 {res}')
+        Time_NLP_LOGGER.debug(f'过滤timeUnit中无用的识别词 {res}')
         return res
