@@ -1,5 +1,5 @@
 # 范围时间的默认时间点
-class RangeTimeEnum():
+class RangeTimeEnum:
     day_break = 3  # 黎明
     early_morning = 8  # 早
     morning = 10  # 上午
@@ -8,5 +8,3 @@ class RangeTimeEnum():
     night = 18  # 晚上、傍晚
     lateNight = 20  # 晚、晚间
     midNight = 23  # 深夜
-
-
