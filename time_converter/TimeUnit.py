@@ -1,4 +1,5 @@
-from .log import Time_NLP_LOGGER
+from loguru import logger
+
 import regex as re
 import arrow
 import copy
@@ -14,7 +15,7 @@ class TimeUnit:
         exp_time: 时间表达式
         normalizer: TimeNormalizer 类
         """
-        Time_NLP_LOGGER.debug(f"TimeUnit Init: {exp_time} {contextTp}")
+        logger.debug(f"TimeUnit Init: {exp_time} {contextTp}")
         self._noyear = False
         self.exp_time = exp_time
         self.normalizer = normalizer
@@ -46,7 +47,7 @@ class TimeUnit:
         self.norm_setHoliday()
         self.modifyTimeBase()
         self.tp_origin.tunit = copy.deepcopy(self.tp.tunit)
-        Time_NLP_LOGGER.debug(f"self.tp {self.tp}")
+        logger.debug(f"self.tp {self.tp}")
         # 判断是时间点还是时间区间
         flag = True
         for i in range(0, 4):
@@ -56,9 +57,9 @@ class TimeUnit:
             self.normalizer.isTimeSpan = True
 
         if self.normalizer.isTimeSpan:
-            Time_NLP_LOGGER.debug("判断是时间段")
+            logger.debug("判断是时间段")
         else:
-            Time_NLP_LOGGER.debug("判断是时间点")
+            logger.debug("判断是时间点")
 
         if self.normalizer.isTimeSpan:
             days = 0
@@ -76,7 +77,7 @@ class TimeUnit:
             if seconds == 0 and days == 0:
                 self.normalizer.invalidSpan = True
             self.normalizer.timeSpan = self.genSpan(days, seconds)
-            Time_NLP_LOGGER.debug(f"时间段: {self.normalizer.timeSpan}")
+            logger.debug(f"时间段: {self.normalizer.timeSpan}")
             return
 
         time_grid = self.normalizer.timeBase.split("-")
@@ -88,7 +89,7 @@ class TimeUnit:
                 self.tp.tunit[i] = int(time_grid[i])
 
         self.time = self.genTime(self.tp.tunit)
-        Time_NLP_LOGGER.debug(f"时间点: {self.time}")
+        logger.debug(f"时间点: {self.time}")
 
     def genSpan(self, days, seconds):
         day = int(seconds / (3600 * 24))
@@ -529,7 +530,7 @@ class TimeUnit:
         设置以上文时间为基准的时间偏移计算
         :return:
         """
-        Time_NLP_LOGGER.debug(f"设置以上文时间为基准的时间偏移计算: {self.exp_time}")
+        logger.debug(f"设置以上文时间为基准的时间偏移计算: {self.exp_time}")
         cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
         flag = [False, False, False]
 
@@ -952,7 +953,7 @@ class TimeUnit:
                 week = 1
             week -= 1
             span = week - cur.weekday()
-            Time_NLP_LOGGER.info(cur)
+            logger.info(cur)
 
             cur = cur.shift(weeks=1, days=span)
 
@@ -1055,8 +1056,8 @@ class TimeUnit:
         time_arr = self.normalizer.timeBase.split("-")
         cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
         cur_unit = int(time_arr[checkTimeIndex])
-        Time_NLP_LOGGER.debug(time_arr)
-        Time_NLP_LOGGER.debug(self.tp.tunit)
+        logger.debug(time_arr)
+        logger.debug(self.tp.tunit)
         if self.tp.tunit[0] == -1:
             self._noyear = True
         else:
@@ -1083,8 +1084,8 @@ class TimeUnit:
         time_arr = self.normalizer.timeBase.split("-")
         if self._noyear:
             # check the month
-            Time_NLP_LOGGER.debug(parse)
-            Time_NLP_LOGGER.debug(time_arr)
+            logger.debug(parse)
+            logger.debug(time_arr)
             if parse[1] == int(time_arr[1]):
                 if parse[2] > int(time_arr[2]):
                     parse[0] = parse[0] - 1
