@@ -1,10 +1,6 @@
-import pickle
-import regex as re
 import arrow
-import json
-import os
+import regex as re
 from loguru import logger
-
 
 from .StringPreHandler import StringPreHandler
 from .TimePoint import TimePoint
@@ -15,7 +11,7 @@ from .TimeUnit import TimeUnit
 class TimeNormalizer:
     def __init__(self, isPreferFuture=True):
         self.isPreferFuture = isPreferFuture
-        self.pattern, self.holi_solar, self.holi_lunar = self.init()
+        self.pattern, self.solar, self.lunar = self.init()
 
     # 这里对一些不规范的表达做转换
     def _filter(self, input_query):
@@ -57,34 +53,10 @@ class TimeNormalizer:
         return input_query
 
     def init(self):
-        fpath = os.path.dirname(__file__) + "/resource/reg.pkl"
-        try:
-            with open(fpath, "rb") as f:
-                pattern = pickle.load(f)
-        except Exception:
-            with open(
-                os.path.dirname(__file__) + "/resource/regex.txt", "r", encoding="utf-8"
-            ) as f:
-                content = f.read()
-            p = re.compile(content)
-            with open(fpath, "wb") as f:
-                pickle.dump(p, f)
-            with open(fpath, "rb") as f:
-                pattern = pickle.load(f)
+        from .resource.pattern import pattern
+        from .resource.holiday import solar, lunar
 
-        with open(
-            os.path.dirname(__file__) + "/resource/holi_solar.json",
-            "r",
-            encoding="utf-8",
-        ) as f:
-            holi_solar = json.load(f)
-        with open(
-            os.path.dirname(__file__) + "/resource/holi_lunar.json",
-            "r",
-            encoding="utf-8",
-        ) as f:
-            holi_lunar = json.load(f)
-        return pattern, holi_solar, holi_lunar
+        return pattern, solar, lunar
 
     def parse(self, target, timeBase=arrow.now("Asia/Shanghai")):
         """

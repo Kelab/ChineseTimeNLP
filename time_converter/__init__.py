@@ -7,7 +7,7 @@ from .StringPreHandler import StringPreHandler
 from .TimeNormalizer import TimeNormalizer
 
 logger.remove()
-default_logger = logger.add(sys.stderr, level="INFO")
+default_logger = logger.add(sys.stdout, level="INFO")
 
 
 __all__ = [

@@ -662,10 +662,10 @@ class TimeUnit:
             holi = match.group()
             if "节" not in holi:
                 holi += "节"
-            if holi in self.normalizer.holi_solar:
-                date = self.normalizer.holi_solar[holi].split("-")
-            elif holi in self.normalizer.holi_lunar:
-                date = self.normalizer.holi_lunar[holi].split("-")
+            if holi in self.normalizer.solar:
+                date = self.normalizer.solar[holi].split("-")
+            elif holi in self.normalizer.lunar:
+                date = self.normalizer.lunar[holi].split("-")
                 lsConverter = LunarSolarConverter()
                 lunar = Lunar(self.tp.tunit[0], int(date[0]), int(date[1]), False)
                 solar = lsConverter.LunarToSolar(lunar)
