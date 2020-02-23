@@ -1,6 +1,11 @@
+# time_formatter
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## 声明
-fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下：
-```
+
+fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
+```python
 # -*- coding: utf-8 -*-
 # @Time    : 2017/11/20 17:01
 # @Author  : zhm
@@ -8,17 +13,19 @@ fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为�
 # @Software: PyCharm
 # @Changed : tianyuningmou
 ```
-感谢作者。
 
 ## 简介
+
 这是 Time-NLP 的 Python3 版本。  
 相关链接：
+
 - Python 版本 https://github.com/sunfiyes/Time-NLPY  
 - Python2 版本 https://github.com/ryanInf/Time-NLPY/tree/Python2%E7%89%88%E6%9C%AC
 - Python3 版本 https://github.com/ryanInf/Time-NLPY/
 - Java 版本 https://github.com/shinyke/Time-NLP
 
 ## 配置
+
 ```py
 TimeNormalizer(isPreferFuture=True):
 ```
@@ -27,28 +34,30 @@ TimeNormalizer(isPreferFuture=True):
 ## 安装使用
 
 开发前安装依赖
+
 ```bash
 pip install -r requirements.txt
 ```
 
 在本地安装
+
 ```bash
-python setup.py install 
+python setup.py install
 ```
 
 生成包:
+
 ```bash
 # 按照不同系统生成
-python setup.py bdist
-# 生成 wheel 包
-python setup.py bdist_wheel
+python setup.py sdist bdist_wheel
 ```
 
 ## 功能说明
+
 用于句子中时间词的抽取和转换  
 详情请见 `Test.py`
-```py
 
+```py
 tn = TimeNormalizer(isPreferFuture=False)
 
 res = tn.parse(target=u'星期天晚上')  # target为待分析语句，timeBase为基准时间默认是当前时间
@@ -100,7 +109,9 @@ print(res)
 print('====')
 
 ```
-结果：
+
+结果
+：
 ```sh
 目标字符串:  星期天晚上
 基础时间 2019-7-28-15-47-27
@@ -159,11 +170,13 @@ temp []
 {"type": "error", "error": "no time pattern could be extracted."}
 ====
 ```
+
 ## 使用方式 
+
 见 `Test.py`
 
 ## TODO
 
 | 问题                  | 现在版本                                       | 正确                                            |
 | --------------------- | ---------------------------------------------- | ----------------------------------------------- |
-| 晚上8点到上午10点之间 | ["2018-03-16 20:00:00", "2018-03-16 22:00:00"] | ["2018-03-16 20:00:00", "2018-03-17 10:00:00"]" | "timestamp": "2018-04-08 00:00:00" |
+| 晚上8点到上午10点之间 | ["2018-03-16 20:00:00", "2018-03-16 22:00:00"] | ["2018-03-16 20:00:00", "2018-03-17 10:00:00"]" |
