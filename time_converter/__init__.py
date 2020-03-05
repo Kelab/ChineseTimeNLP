@@ -2,6 +2,7 @@ import sys
 
 from loguru import logger
 
+from .resource.pattern import r, pattern
 from .LunarSolarConverter import LunarSolarConverter
 from .StringPreHandler import StringPreHandler
 from .TimeNormalizer import TimeNormalizer
@@ -15,4 +16,6 @@ __all__ = [
     "StringPreHandler",
     "LunarSolarConverter",
     "default_logger",
+    "pattern",
+    "r",
 ]

@@ -5,6 +5,7 @@
 ## 声明
 
 fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
+
 ```python
 # -*- coding: utf-8 -*-
 # @Time    : 2017/11/20 17:01
@@ -19,16 +20,17 @@ fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为�
 这是 Time-NLP 的 Python3 版本。  
 相关链接：
 
-- Python 版本 https://github.com/sunfiyes/Time-NLPY  
-- Python2 版本 https://github.com/ryanInf/Time-NLPY/tree/Python2%E7%89%88%E6%9C%AC
-- Python3 版本 https://github.com/ryanInf/Time-NLPY/
-- Java 版本 https://github.com/shinyke/Time-NLP
+- Python 版本 <https://github.com/sunfiyes/Time-NLPY>
+- Python2 版本 <https://github.com/ryanInf/Time-NLPY/tree/Python2%E7%89%88%E6%9C%AC>
+- Python3 版本 <https://github.com/ryanInf/Time-NLPY>
+- Java 版本 <https://github.com/shinyke/Time-NLP>
 
 ## 配置
 
 ```py
 TimeNormalizer(isPreferFuture=True):
 ```
+
 对于下午两点、晚上十点这样的词汇，在不特别指明的情况下，默认返回明天的时间点。
 
 ## 安装使用
@@ -110,8 +112,8 @@ print('====')
 
 ```
 
-结果
-：
+结果：
+
 ```sh
 目标字符串:  星期天晚上
 基础时间 2019-7-28-15-47-27

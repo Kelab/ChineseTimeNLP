@@ -9,9 +9,16 @@ from .TimeUnit import TimeUnit
 
 # 时间表达式识别的主要工作类
 class TimeNormalizer:
-    def __init__(self, isPreferFuture=True):
+    def __init__(self, isPreferFuture=True, pattern=None):
         self.isPreferFuture = isPreferFuture
-        self.pattern, self.solar, self.lunar = self.init()
+        if pattern is None:
+            from .resource.pattern import pattern
+
+        from .resource.holiday import solar, lunar
+
+        self.pattern = pattern
+        self.solar = solar
+        self.lunar = lunar
 
     # 这里对一些不规范的表达做转换
     def _filter(self, input_query):
@@ -52,19 +59,16 @@ class TimeNormalizer:
         logger.debug(f"对一些不规范的表达：转换后 {input_query}")
         return input_query
 
-    def init(self):
-        from .resource.pattern import pattern
-        from .resource.holiday import solar, lunar
-
-        return pattern, solar, lunar
-
-    def parse(self, target, timeBase=arrow.now("Asia/Shanghai")):
+    def parse(self, target: str, timeBase=None) -> dict:
         """
         TimeNormalizer的构造方法，timeBase取默认的系统当前时间
         :param timeBase: 基准时间点
         :param target: 待分析字符串
         :return: 时间单元数组
         """
+        if timeBase is None:
+            timeBase = arrow.now("Asia/Shanghai")
+
         logger.debug(f"目标字符串: {target}")
         self.isTimeSpan = False
         self.invalidSpan = False
@@ -77,19 +81,16 @@ class TimeNormalizer:
         self.timeToken = self.__timeEx()
         dic = {}
         res = self.timeToken
-
         if self.isTimeSpan:
             if self.invalidSpan:
                 dic["type"] = "error"
                 dic["error"] = "no time pattern could be extracted."
-
             else:
                 result = {}
                 dic["type"] = "timedelta"
                 dic["timedelta"] = self.timeSpan
                 logger.debug(f"timedelta: {dic['timedelta']}")
                 index = dic["timedelta"].find("days")
-
                 days = int(dic["timedelta"][: index - 1])
                 result["year"] = int(days / 365)
                 result["month"] = int(days / 30 - result["year"] * 12)
@@ -121,7 +122,7 @@ class TimeNormalizer:
         待匹配字符串的清理空白符和语气助词以及大写数字转化的预处理
         :return:
         """
-        self.target = StringPreHandler.delKeyword(self.target, "\\s+")  # 清理空白符
+        self.target = StringPreHandler.delKeyword(self.target, r"\s+")  # 清理空白符
         self.target = StringPreHandler.delKeyword(self.target, "[的]+")  # 清理语气助词
         self.target = StringPreHandler.numberTranslator(self.target)  # 大写数字转化
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
@@ -160,7 +161,6 @@ class TimeNormalizer:
         for i in range(0, rpointer):
             # 这里是一个类嵌套了一个类
             res.append(TimeUnit(temp[i], self, contextTp))
-            # res[i].tp.tunit[3] = -1
             contextTp = res[i].tp
 
         logger.debug(f"时间表达式类型数组 {res}")
