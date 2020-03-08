@@ -1,5 +1,7 @@
 # time_formatter
 
+[![PyPI](https://img.shields.io/pypi/v/ChineseTimeNLP.svg)](https://pypi.python.org/pypi/ChineseTimeNLP)
+![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## 声明
@@ -34,6 +36,23 @@ TimeNormalizer(isPreferFuture=True):
 对于下午两点、晚上十点这样的词汇，在不特别指明的情况下，默认返回明天的时间点。
 
 ## 安装使用
+
+安装：
+
+```bash
+pip install ChineseTimeNLP
+```
+
+使用:
+
+```py
+from chinese_time_nlp import TimeNormalizer
+tn = TimeNormalizer()
+res = tn.parse(target=u"三天后")  # target为待分析语句，timeBase为基准时间默认是当前时间
+print(res)
+```
+
+## 本地开发
 
 开发前安装依赖
 
