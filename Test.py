@@ -1,5 +1,5 @@
 import sys
-from time_converter import TimeNormalizer  # 引入包
+from chinese_time_nlp import TimeNormalizer  # 引入包
 from loguru import logger
 
 logger.remove()
