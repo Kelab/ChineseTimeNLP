@@ -1,13 +1,15 @@
-from chinese_time_nlp.utils import arrow2grid, grid2arrow
-from loguru import logger
+import copy
 from typing import TYPE_CHECKING
 
-import regex as re
 import arrow
-import copy
-from .point import TimePoint
+import regex as re
+from loguru import logger
+
 from .enums import RangeTimeEnum
-from .LunarSolarConverter import Lunar, LunarSolarConverter
+from .helpers.arrow_helper import arrow2grid, grid2arrow
+from .helpers.LunarSolarConverter import Lunar, LunarSolarConverter
+from .point import TimePoint
+from .resource import holiday
 
 if TYPE_CHECKING:
     from .normalizer import TimeNormalizer
@@ -646,15 +648,15 @@ class TimeUnit:
             month = 0
             day = 0
             if self.tp.year == -1:
-                year = arrow2grid(self.normalizer.baseTime)[0]
+                year = self.normalizer.baseTime.year
                 self.tp.year = int(year)
             holi = match.group()
             if "节" not in holi:
                 holi += "节"
-            if holi in self.normalizer.solar:
-                month, day = self.normalizer.solar[holi].split("-")
-            elif holi in self.normalizer.lunar:
-                date = self.normalizer.lunar[holi].split("-")
+            if holi in holiday.solar:
+                month, day = holiday.solar[holi].split("-")
+            elif holi in holiday.lunar:
+                date = holiday.lunar[holi].split("-")
                 lsConverter = LunarSolarConverter()
                 lunar = Lunar(self.tp.year, int(date[0]), int(date[1]), False)
                 solar = lsConverter.LunarToSolar(lunar)

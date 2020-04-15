@@ -1,10 +1,12 @@
+from typing import List
+
 import arrow
 import regex as re
 from loguru import logger
-from typing import List
-from .StringPreHandler import StringPreHandler
+
+from .helpers.StringPreHandler import StringPreHandler
 from .point import TimePoint
-from .TimeUnit import TimeUnit
+from .unit import TimeUnit
 
 
 # 时间表达式识别的主要工作类
@@ -14,11 +16,7 @@ class TimeNormalizer:
         if pattern is None:
             from .resource.pattern import pattern
 
-        from .resource.holiday import solar, lunar
-
         self.pattern = pattern
-        self.solar = solar
-        self.lunar = lunar
 
     # 这里对一些不规范的表达做转换
     def _filter(self, input_query):
@@ -74,7 +72,7 @@ class TimeNormalizer:
         self.invalidSpan = False
         self.timeSpan = ""
         self.target = self._filter(target)
-        self.baseTime = baseTime  # .format("YYYY-M-D-H-m-s")
+        self.baseTime = baseTime
         self.__preHandling()
         self.timeToken = self.__timeEx()
         dic = {}
@@ -164,10 +162,9 @@ class TimeNormalizer:
         res = self.__filterTimeUnit(res)
         return res
 
-    def __filterTimeUnit(self, tu_arr):
+    def __filterTimeUnit(self, tu_arr: List[TimeUnit]):
         """
         过滤timeUnit中无用的识别词。无用识别词识别出的时间是1970.01.01 00:00:00(fastTime=0)
-        :param tu_arr:
         :return:
         """
         if (tu_arr is None) or (len(tu_arr) < 1):

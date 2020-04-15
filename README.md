@@ -4,19 +4,6 @@
 ![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## 声明
-
-fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
-
-```python
-# -*- coding: utf-8 -*-
-# @Time    : 2017/11/20 17:01
-# @Author  : zhm
-# @File    : TimeUnit.py
-# @Software: PyCharm
-# @Changed : tianyuningmou
-```
-
 ## 简介
 
 这是 Time-NLP 的 Python3 版本。  
@@ -201,3 +188,16 @@ temp []
 | 问题                  | 现在版本                                       | 正确                                            |
 | --------------------- | ---------------------------------------------- | ----------------------------------------------- |
 | 晚上8点到上午10点之间 | ["2018-03-16 20:00:00", "2018-03-16 22:00:00"] | ["2018-03-16 20:00:00", "2018-03-17 10:00:00"]" |
+
+## 声明
+
+fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
+
+```python
+# -*- coding: utf-8 -*-
+# @Time    : xxxxxxxx
+# @Author  : zhm
+# @File    : xxxxx
+# @Software: PyCharm
+# @Changed : tianyuningmou
+```

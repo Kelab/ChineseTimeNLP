@@ -3,9 +3,9 @@ import sys
 from loguru import logger
 
 from .resource.pattern import r, pattern
-from .LunarSolarConverter import LunarSolarConverter
-from .StringPreHandler import StringPreHandler
 from .normalizer import TimeNormalizer
+from .helpers.StringPreHandler import StringPreHandler
+from .helpers.LunarSolarConverter import LunarSolarConverter
 
 logger.remove()
 default_logger = logger.add(sys.stdout, level="INFO")
