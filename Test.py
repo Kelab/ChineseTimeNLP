@@ -2,8 +2,11 @@ import sys
 from chinese_time_nlp import TimeNormalizer  # 引入包
 from loguru import logger
 
+
 logger.remove()
-default_logger = logger.add(sys.stdout, format="{level}|{file} <red>{message}</>", level="DEBUG")
+default_logger = logger.add(
+    sys.stdout, format="{level}|{file} <red>{message}</>", level="DEBUG"
+)
 
 tn = TimeNormalizer(isPreferFuture=False)
 

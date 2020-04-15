@@ -1,10 +1,13 @@
 from typing import List
 
 import arrow
-import regex as re
 from loguru import logger
 
-from .helpers.StringPreHandler import StringPreHandler
+from .helpers.str_common import (
+    del_keyword,
+    number_translator,
+    filter_irregular_expression,
+)
 from .point import TimePoint
 from .unit import TimeUnit
 
@@ -18,45 +21,6 @@ class TimeNormalizer:
 
         self.pattern = pattern
 
-    # 这里对一些不规范的表达做转换
-    def _filter(self, input_query):
-        logger.debug(f"对一些不规范的表达：转换前 {input_query}")
-
-        # 这里对于下个周末这种做转化 把个给移除掉
-        input_query = StringPreHandler.numberTranslator(input_query)
-
-        rule = "[0-9]月[0-9]"
-        pattern = re.compile(rule)
-        match = pattern.search(input_query)
-        if match is not None:
-            index = input_query.find("月")
-            rule = "日|号"
-            pattern = re.compile(rule)
-            match = pattern.search(input_query[index:])
-            if match is None:
-                rule = "[0-9]月[0-9]+"
-                pattern = re.compile(rule)
-                match = pattern.search(input_query)
-                if match is not None:
-                    end = match.span()[1]
-                    input_query = input_query[:end] + "号" + input_query[end:]
-
-        rule = "月"
-        pattern = re.compile(rule)
-        match = pattern.search(input_query)
-        if match is None:
-            input_query = input_query.replace("个", "")
-
-        input_query = input_query.replace("中旬", "15号")
-        input_query = input_query.replace("傍晚", "午后")
-        input_query = input_query.replace("大年", "")
-        input_query = input_query.replace("新年", "春节")
-        input_query = input_query.replace("五一", "劳动节")
-        input_query = input_query.replace("白天", "早上")
-        input_query = input_query.replace("：", ":")
-        logger.debug(f"对一些不规范的表达：转换后 {input_query}")
-        return input_query
-
     def parse(self, target: str, baseTime=None) -> dict:
         """
         TimeNormalizer的构造方法，baseTime取默认的系统当前时间
@@ -68,10 +32,11 @@ class TimeNormalizer:
             baseTime = arrow.now("Asia/Shanghai")
 
         logger.debug(f"目标字符串: {target}")
+
         self.isTimeSpan = False
         self.invalidSpan = False
         self.timeSpan = ""
-        self.target = self._filter(target)
+        self.target = filter_irregular_expression(target)
         self.baseTime = baseTime
         self.__preHandling()
         self.timeToken = self.__timeEx()
@@ -118,9 +83,9 @@ class TimeNormalizer:
         待匹配字符串的清理空白符和语气助词以及大写数字转化的预处理
         :return:
         """
-        self.target = StringPreHandler.delKeyword(self.target, r"\s+")  # 清理空白符
-        self.target = StringPreHandler.delKeyword(self.target, "[的]+")  # 清理语气助词
-        self.target = StringPreHandler.numberTranslator(self.target)  # 大写数字转化
+        self.target = del_keyword(self.target, r"\s+")  # 清理空白符
+        self.target = del_keyword(self.target, "[的]+")  # 清理语气助词
+        self.target = number_translator(self.target)  # 大写数字转化
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
 
     def __timeEx(self) -> List[TimeUnit]:
