@@ -23,7 +23,10 @@ class TimeUnit:
         exp_time: 时间表达式 \n
         normalizer: TimeNormalizer 类
         """
-        logger.debug(f"TimeUnit Init: {exp_time} {contextTp}")
+        logger.debug(f"TimeUnit 初始化:")
+        logger.debug(f"          字段: {exp_time}")
+        logger.debug(f"         上下文: {contextTp}")
+
         self._noyear = False
         self.exp_time = exp_time
         self.normalizer = normalizer
@@ -54,6 +57,7 @@ class TimeUnit:
         self.norm_setSpanRelated()
         self.norm_setHoliday()
         self.modifyTimeBase()
+
         self.tp_origin.tunit = copy.deepcopy(self.tp.tunit)
         logger.debug(f"self.tp {self.tp}")
         # 判断是时间点还是时间区间
@@ -108,6 +112,14 @@ class TimeUnit:
         年-规范化方法--该方法识别时间表达式单元的年字段
         :return:
         """
+        # xx年后
+        rule = "([0-9]{1,})(?=年后)"
+        pattern = re.compile(rule)
+        match = pattern.search(self.exp_time)
+        if match is not None:
+            self.tp.set_unit(self.normalizer.baseTime.shift(years=int(match.group())))
+            return
+
         # 一位数表示的年份
         rule = "(?<![0-9])[0-9]{1}(?=年)"
         pattern = re.compile(rule)

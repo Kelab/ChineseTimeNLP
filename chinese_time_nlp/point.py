@@ -1,5 +1,5 @@
 from arrow import Arrow
-from .helpers.int_common import not_neg_number
+from chinese_time_nlp.helpers.arrow_helper import arrow2grid
 
 
 class TimePoint:
@@ -62,19 +62,22 @@ class TimePoint:
         self.tunit[5] = value
 
     def get_today_seconds(self):
-        hour = not_neg_number(self.hour)
-        minute = not_neg_number(self.minute)
-        second = not_neg_number(self.second)
+        hour = max(self.hour, 0)
+        minute = max(self.minute, 0)
+        second = max(self.second, 0)
         return hour * 3600 + minute * 60 + second
 
     def get_arrow(self) -> Arrow:
-        year = not_neg_number(self.year)
-        month = not_neg_number(self.month)
-        day = not_neg_number(self.day)
-        hour = not_neg_number(self.hour)
-        minute = not_neg_number(self.minute)
-        second = not_neg_number(self.second)
+        year = max(self.year, 1)
+        month = max(self.month, 1)
+        day = max(self.day, 1)
+        hour = max(self.hour, 0)
+        minute = max(self.minute, 0)
+        second = max(self.second, 0)
         return Arrow(year, month, day, hour, minute, second)
+
+    def set_unit(self, arrow: Arrow):
+        self.tunit = list(map(int, arrow2grid(arrow)))
 
     def __repr__(self) -> str:
         return str(self.tunit)

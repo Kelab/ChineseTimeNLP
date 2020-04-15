@@ -1,12 +1,10 @@
 import sys
-from chinese_time_nlp import TimeNormalizer  # 引入包
+from chinese_time_nlp import TimeNormalizer, logger_format  # 引入包
 from loguru import logger
 
 
 logger.remove()
-default_logger = logger.add(
-    sys.stdout, format="{level}|{file} <red>{message}</>", level="DEBUG"
-)
+default_logger = logger.add(sys.stdout, format=logger_format, level="DEBUG")
 
 tn = TimeNormalizer(isPreferFuture=False)
 
@@ -18,6 +16,13 @@ res = tn.parse(target=u"2.5小时")  # target为待分析语句，baseTime为基
 print(res)
 print("====\n")
 
+res = tn.parse(target=u"3年后")  # target为待分析语句，baseTime为基准时间默认是当前时间
+print(res)
+print("====\n")
+
+res = tn.parse(target=u"10年后")  # target为待分析语句，baseTime为基准时间默认是当前时间
+print(res)
+print("====\n")
 
 res = tn.parse(target=u"下周五我有什么课")  # target为待分析语句，baseTime为基准时间默认是当前时间
 print(res)
