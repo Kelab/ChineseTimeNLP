@@ -8,24 +8,34 @@ def filter_irregular_expression(input_query):
     # 这里对于下个周末这种做转化 把个给移除掉
     input_query = number_translator(input_query)
 
-    rule = "[0-9]月[0-9]"
+    rule = r"[0-9]月[0-9]"
     pattern = re.compile(rule)
     match = pattern.search(input_query)
     if match is not None:
         index = input_query.find("月")
-        rule = "日|号"
+        rule = r"日|号"
         pattern = re.compile(rule)
         match = pattern.search(input_query[index:])
         if match is None:
-            rule = "[0-9]月[0-9]+"
+            rule = r"[0-9]月[0-9]+"
             pattern = re.compile(rule)
             match = pattern.search(input_query)
             if match is not None:
                 end = match.span()[1]
                 input_query = input_query[:end] + "号" + input_query[end:]
+    # 一个半小时
+    pattern = re.compile(r"(.*半)(?=(小时|月))")
+    match = pattern.search(input_query)
+    if match is not None:
+        test_ge = re.compile(r"(.*)(?=个半)")
+        test_ge_match = test_ge.match(match.group())
+        if match.group() == "半":
+            input_query = input_query.replace("半", "0.5")
+        elif test_ge_match is not None:
+            number = test_ge_match.group() + ".5"
+            input_query = input_query.replace(test_ge_match.group() + "个半", number)
 
-    rule = "月"
-    pattern = re.compile(rule)
+    pattern = re.compile(r"小时|月")
     match = pattern.search(input_query)
     if match is None:
         input_query = input_query.replace("个", "")
@@ -68,7 +78,8 @@ def number_translator(target):
     :param target: 待转化的字符串
     :return: 转化完毕后的字符串
     """
-    pattern = re.compile("[一二两三四五六七八九123456789]万[一二两三四五六七八九123456789](?!(千|百|十))")
+    logger.debug(f"before number_translator: {target}")
+    pattern = re.compile(r"[一二两三四五六七八九123456789]万[一二两三四五六七八九123456789](?!(千|百|十))")
     match = pattern.finditer(target)
     for m in match:
         group = m.group()
@@ -79,7 +90,7 @@ def number_translator(target):
             num += word2number(s[0]) * 10000 + word2number(s[1]) * 1000
         target = pattern.sub(str(num), target, 1)
 
-    pattern = re.compile("[一二两三四五六七八九123456789]千[一二两三四五六七八九123456789](?!(百|十))")
+    pattern = re.compile(r"[一二两三四五六七八九123456789]千[一二两三四五六七八九123456789](?!(百|十))")
     match = pattern.finditer(target)
     for m in match:
         group = m.group()
@@ -90,7 +101,7 @@ def number_translator(target):
             num += word2number(s[0]) * 1000 + word2number(s[1]) * 100
         target = pattern.sub(str(num), target, 1)
 
-    pattern = re.compile("[一二两三四五六七八九123456789]百[一二两三四五六七八九123456789](?!十)")
+    pattern = re.compile(r"[一二两三四五六七八九123456789]百[一二两三四五六七八九123456789](?!十)")
     match = pattern.finditer(target)
     for m in match:
         group = m.group()
@@ -101,7 +112,7 @@ def number_translator(target):
             num += word2number(s[0]) * 100 + word2number(s[1]) * 10
         target = pattern.sub(str(num), target, 1)
 
-    pattern = re.compile("[零一二两三四五六七八九]")
+    pattern = re.compile(r"[零一二两三四五六七八九]")
     match = pattern.finditer(target)
     for m in match:
         target = pattern.sub(str(word2number(m.group())), target, 1)
@@ -173,10 +184,11 @@ def number_translator(target):
             num += int(s[1])
         target = pattern.sub(str(num), target, 1)
 
+    logger.debug(f"after number_translator: {target}")
     return target
 
 
-def word2number(s):
+def word2number(s: str):
     """
     方法number_translator的辅助方法，可将[零-九]正确翻译为[0-9]
     :param s: 大写数字
@@ -188,6 +200,7 @@ def word2number(s):
         "一": 1,
         "1": 1,
         "二": 2,
+        "两": 2,
         "2": 2,
         "三": 3,
         "3": 3,
