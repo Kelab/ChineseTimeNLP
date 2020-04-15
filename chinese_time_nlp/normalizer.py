@@ -36,7 +36,7 @@ class TimeNormalizer:
         self.isTimeSpan = False
         self.invalidSpan = False
         self.timeSpan = ""
-        self.target = filter_irregular_expression(target)
+        self.target = target
         self.baseTime = baseTime
         self.__preHandling()
         self.timeToken = self.__timeEx()
@@ -83,6 +83,7 @@ class TimeNormalizer:
         待匹配字符串的清理空白符和语气助词以及大写数字转化的预处理
         :return:
         """
+        self.target = filter_irregular_expression(self.target)
         self.target = del_keyword(self.target, r"\s+")  # 清理空白符
         self.target = del_keyword(self.target, "[的]+")  # 清理语气助词
         self.target = number_translator(self.target)  # 大写数字转化
@@ -108,6 +109,7 @@ class TimeNormalizer:
                 temp[rpointer] = temp[rpointer] + m.group()
             else:
                 temp.append(m.group())
+            logger.debug(f"temp：{temp}")
             endline = m.end()
             rpointer += 1
         logger.debug("=======")
@@ -118,6 +120,7 @@ class TimeNormalizer:
 
         logger.debug(f"基础时间 {self.baseTime}")
         logger.debug(f"待处理的字段: {temp}")
+        logger.debug(f"rpointer: {rpointer}")
         for i in range(0, rpointer):
             # 这里是一个类嵌套了一个类
             res.append(TimeUnit(temp[i], self, contextTp))
