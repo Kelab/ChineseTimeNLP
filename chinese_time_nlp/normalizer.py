@@ -59,24 +59,24 @@ class TimeNormalizer:
         logger.debug(f"对一些不规范的表达：转换后 {input_query}")
         return input_query
 
-    def parse(self, target: str, timeBase=None) -> dict:
+    def parse(self, target: str, baseTime=None) -> dict:
         """
-        TimeNormalizer的构造方法，timeBase取默认的系统当前时间
-        :param timeBase: 基准时间点
+        TimeNormalizer的构造方法，baseTime取默认的系统当前时间
+        :param baseTime: 基准时间点
         :param target: 待分析字符串
         :return: 时间单元数组
         """
-        if timeBase is None:
-            timeBase = arrow.now("Asia/Shanghai")
+        if baseTime is None:
+            baseTime = arrow.now("Asia/Shanghai")
 
         logger.debug(f"目标字符串: {target}")
         self.isTimeSpan = False
         self.invalidSpan = False
         self.timeSpan = ""
         self.target = self._filter(target)
-        self.timeBase = arrow.get(timeBase).format("YYYY-M-D-H-m-s")
-        self.nowTime = timeBase
-        self.oldTimeBase = self.timeBase
+        self.baseTime = arrow.get(baseTime).format("YYYY-M-D-H-m-s")
+        self.nowTime = baseTime
+        self.oldTimeBase = self.baseTime
         self.__preHandling()
         self.timeToken = self.__timeEx()
         dic = {}
@@ -130,7 +130,7 @@ class TimeNormalizer:
     def __timeEx(self):
         """
         :param target: 输入文本字符串
-        :param timeBase: 输入基准时间
+        :param baseTime: 输入基准时间
         :return: TimeUnit[]时间表达式类型数组
         """
         startline = -1
@@ -157,7 +157,7 @@ class TimeNormalizer:
         # 时间上下文： 前一个识别出来的时间会是下一个时间的上下文，用于处理：周六3点到5点这样的多个时间的识别，第二个5点应识别到是周六的。
         contextTp = TimePoint()
 
-        logger.debug(f"基础时间 {self.timeBase}")
+        logger.debug(f"基础时间 {self.baseTime}")
         logger.debug(f"待处理的字段: {temp}")
         for i in range(0, rpointer):
             # 这里是一个类嵌套了一个类

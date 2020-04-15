@@ -1,5 +1,5 @@
 from loguru import logger
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 import regex as re
 import arrow
@@ -68,24 +68,21 @@ class TimeUnit:
 
         if self.normalizer.isTimeSpan:
             days = 0
-            if self.tp.tunit[0] > 0:
-                days += 365 * self.tp.tunit[0]
-            if self.tp.tunit[1] > 0:
-                days += 30 * self.tp.tunit[1]
-            if self.tp.tunit[2] > 0:
-                days += self.tp.tunit[2]
-            tunit = self.tp.tunit
-            for i in range(3, 6):
-                if self.tp.tunit[i] < 0:
-                    tunit[i] = 0
-            seconds = tunit[3] * 3600 + tunit[4] * 60 + tunit[5]
+            if self.tp.year > 0:
+                days += 365 * self.tp.year
+            if self.tp.month > 0:
+                days += 30 * self.tp.month
+            if self.tp.day > 0:
+                days += self.tp.day
+
+            seconds = self.tp.get_today_seconds()
             if seconds == 0 and days == 0:
                 self.normalizer.invalidSpan = True
             self.normalizer.timeSpan = self.genSpan(days, seconds)
             logger.debug(f"时间段: {self.normalizer.timeSpan}")
             return
 
-        time_grid = self.normalizer.timeBase.split("-")
+        time_grid = self.normalizer.baseTime.split("-")
         tunitpointer = 5
         while tunitpointer >= 0 and self.tp.tunit[tunitpointer] < 0:
             tunitpointer -= 1
@@ -93,7 +90,7 @@ class TimeUnit:
             if self.tp.tunit[i] < 0:
                 self.tp.tunit[i] = int(time_grid[i])
 
-        self.time = self.genTime(self.tp.tunit)
+        self.time = self.tp.get_arrow()
         logger.debug(f"时间点: {self.time}")
 
     def genSpan(self, days, seconds):
@@ -102,22 +99,6 @@ class TimeUnit:
         m = int(((seconds % (3600 * 24)) % 3600) / 60)
         s = int(((seconds % (3600 * 24)) % 3600) % 60)
         return str(days + day) + " days, " + "%d:%02d:%02d" % (h, m, s)
-
-    def genTime(self, tunit):
-        time = arrow.get("1970-01-01 00:00:00")
-        if tunit[0] > 0:
-            time = time.replace(year=int(tunit[0]))
-        if tunit[1] > 0:
-            time = time.replace(month=tunit[1])
-        if tunit[2] > 0:
-            time = time.replace(day=tunit[2])
-        if tunit[3] > 0:
-            time = time.replace(hour=tunit[3])
-        if tunit[4] > 0:
-            time = time.replace(minute=tunit[4])
-        if tunit[5] > 0:
-            time = time.replace(second=tunit[5])
-        return time
 
     def norm_setyear(self):
         """
@@ -131,7 +112,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             year = int(match.group())
-            self.tp.tunit[0] = year
+            self.tp.year = year
 
         # 两位数表示的年份
         rule = "[0-9]{2}(?=年)"
@@ -139,7 +120,7 @@ class TimeUnit:
         match = pattern.search(self.exp_time)
         if match is not None:
             year = int(match.group())
-            self.tp.tunit[0] = year
+            self.tp.year = year
 
         # 三位数表示的年份
         rule = "(?<![0-9])[0-9]{3}(?=年)"
@@ -148,7 +129,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             year = int(match.group())
-            self.tp.tunit[0] = year
+            self.tp.year = year
 
         # 四位数表示的年份
         rule = "[0-9]{4}(?=年)"
@@ -156,7 +137,7 @@ class TimeUnit:
         match = pattern.search(self.exp_time)
         if match is not None:
             year = int(match.group())
-            self.tp.tunit[0] = year
+            self.tp.year = year
 
     def norm_setmonth(self):
         """
@@ -167,7 +148,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[1] = int(match.group())
+            self.tp.month = int(match.group())
             # 处理倾向于未来时间的情况
             self.preferFuture(1)
 
@@ -187,8 +168,8 @@ class TimeUnit:
                 splitIndex = m.start()
                 month = matchStr[0:splitIndex]
                 day = matchStr[splitIndex + 1 :]
-                self.tp.tunit[1] = int(month)
-                self.tp.tunit[2] = int(day)
+                self.tp.month = int(month)
+                self.tp.day = int(day)
                 # 处理倾向于未来时间的情况
                 self.preferFuture(1)
             self._check_time(self.tp.tunit)
@@ -202,7 +183,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[2] = int(match.group())
+            self.tp.day = int(match.group())
             # 处理倾向于未来时间的情况
             self.preferFuture(2)
             self._check_time(self.tp.tunit)
@@ -212,7 +193,7 @@ class TimeUnit:
         match = pattern.search(self.exp_time)
         if match is not None:
             self.normalizer.isTimeSpan = True
-            self.tp.tunit[2] = int(match.group())
+            self.tp.day = int(match.group())
             self._check_time(self.tp.tunit)
 
     def norm_checkKeyword(self):
@@ -226,12 +207,12 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.tunit[3] == -1:  # 增加对没有明确时间点，只写了“凌晨”这种情况的处理
-                self.tp.tunit[3] = RangeTimeEnum.day_break
-            elif 12 <= self.tp.tunit[3] <= 23:
-                self.tp.tunit[3] -= 12
-            elif self.tp.tunit[3] == 0:
-                self.tp.tunit[3] = 12
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“凌晨”这种情况的处理
+                self.tp.hour = RangeTimeEnum.day_break
+            elif 12 <= self.tp.hour <= 23:
+                self.tp.hour -= 12
+            elif self.tp.hour == 0:
+                self.tp.hour = 12
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
@@ -240,13 +221,13 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.tunit[3] == -1:  # 增加对没有明确时间点，只写了“早上/早晨/早间”这种情况的处理
-                self.tp.tunit[3] = RangeTimeEnum.early_morning
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“早上/早晨/早间”这种情况的处理
+                self.tp.hour = RangeTimeEnum.early_morning
                 # 处理倾向于未来时间的情况
-            elif 12 <= self.tp.tunit[3] <= 23:
-                self.tp.tunit[3] -= 12
-            elif self.tp.tunit[3] == 0:
-                self.tp.tunit[3] = 12
+            elif 12 <= self.tp.hour <= 23:
+                self.tp.hour -= 12
+            elif self.tp.hour == 0:
+                self.tp.hour = 12
             self.preferFuture(3)
             self.isAllDayTime = False
 
@@ -254,12 +235,12 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.tunit[3] == -1:  # 增加对没有明确时间点，只写了“上午”这种情况的处理
-                self.tp.tunit[3] = RangeTimeEnum.morning
-            elif 12 <= self.tp.tunit[3] <= 23:
-                self.tp.tunit[3] -= 12
-            elif self.tp.tunit[3] == 0:
-                self.tp.tunit[3] = 12
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“上午”这种情况的处理
+                self.tp.hour = RangeTimeEnum.morning
+            elif 12 <= self.tp.hour <= 23:
+                self.tp.hour -= 12
+            elif self.tp.hour == 0:
+                self.tp.hour = 12
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
@@ -268,10 +249,10 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if 0 <= self.tp.tunit[3] <= 10:
-                self.tp.tunit[3] += 12
-            if self.tp.tunit[3] == -1:  # 增加对没有明确时间点，只写了“中午/午间”这种情况的处理
-                self.tp.tunit[3] = RangeTimeEnum.noon
+            if 0 <= self.tp.hour <= 10:
+                self.tp.hour += 12
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“中午/午间”这种情况的处理
+                self.tp.hour = RangeTimeEnum.noon
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
@@ -280,10 +261,10 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if 0 <= self.tp.tunit[3] <= 11:
-                self.tp.tunit[3] += 12
-            if self.tp.tunit[3] == -1:  # 增加对没有明确时间点，只写了“下午|午后”这种情况的处理
-                self.tp.tunit[3] = RangeTimeEnum.afternoon
+            if 0 <= self.tp.hour <= 11:
+                self.tp.hour += 12
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“下午|午后”这种情况的处理
+                self.tp.hour = RangeTimeEnum.afternoon
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
@@ -292,12 +273,12 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if 0 <= self.tp.tunit[3] <= 11:
-                self.tp.tunit[3] += 12
-            elif self.tp.tunit[3] == 12:
-                self.tp.tunit[3] = 0
-            elif self.tp.tunit[3] == -1:  # 增加对没有明确时间点，只写了“下午|午后”这种情况的处理
-                self.tp.tunit[3] = RangeTimeEnum.lateNight
+            if 0 <= self.tp.hour <= 11:
+                self.tp.hour += 12
+            elif self.tp.hour == 12:
+                self.tp.hour = 0
+            elif self.tp.hour == -1:  # 增加对没有明确时间点，只写了“下午|午后”这种情况的处理
+                self.tp.hour = RangeTimeEnum.lateNight
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
@@ -311,8 +292,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[3] = int(match.group())
-            # print('first', self.tp.tunit[3] )
+            self.tp.hour = int(match.group())
             self.norm_checkKeyword()
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
@@ -330,7 +310,7 @@ class TimeUnit:
         match = pattern.search(self.exp_time)
         if match is not None:
             if match.group() != "":
-                self.tp.tunit[4] = int(match.group())
+                self.tp.minute = int(match.group())
                 # 处理倾向于未来时间的情况
                 # self.preferFuture(4)
                 self.isAllDayTime = False
@@ -339,7 +319,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[4] = 15
+            self.tp.minute = 15
             # 处理倾向于未来时间的情况
             # self.preferFuture(4)
             self.isAllDayTime = False
@@ -348,7 +328,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[4] = 30
+            self.tp.minute = 30
             # 处理倾向于未来时间的情况
             self.preferFuture(4)
             self.isAllDayTime = False
@@ -357,7 +337,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[4] = 45
+            self.tp.minute = 45
             # 处理倾向于未来时间的情况
             # self.preferFuture(4)
             self.isAllDayTime = False
@@ -371,7 +351,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.tp.tunit[5] = int(match.group())
+            self.tp.second = int(match.group())
             self.isAllDayTime = False
 
     def norm_setSpecial(self):
@@ -389,12 +369,12 @@ class TimeUnit:
             tmp_target = match.group()
             tmp_parser = tmp_target.split(":")
             if 0 <= int(tmp_parser[0]) <= 11:
-                self.tp.tunit[3] = int(tmp_parser[0]) + 12
+                self.tp.hour = int(tmp_parser[0]) + 12
             else:
-                self.tp.tunit[3] = int(tmp_parser[0])
+                self.tp.hour = int(tmp_parser[0])
 
-            self.tp.tunit[4] = int(tmp_parser[1])
-            self.tp.tunit[5] = int(tmp_parser[2])
+            self.tp.minute = int(tmp_parser[1])
+            self.tp.second = int(tmp_parser[2])
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
             self.isAllDayTime = False
@@ -410,10 +390,10 @@ class TimeUnit:
                 tmp_target = match.group()
                 tmp_parser = tmp_target.split(":")
                 if 0 <= int(tmp_parser[0]) <= 11:
-                    self.tp.tunit[3] = int(tmp_parser[0]) + 12
+                    self.tp.hour = int(tmp_parser[0]) + 12
                 else:
-                    self.tp.tunit[3] = int(tmp_parser[0])
-                self.tp.tunit[4] = int(tmp_parser[1])
+                    self.tp.hour = int(tmp_parser[0])
+                self.tp.minute = int(tmp_parser[1])
                 # 处理倾向于未来时间的情况
                 self.preferFuture(3)
                 self.isAllDayTime = False
@@ -429,12 +409,12 @@ class TimeUnit:
                 tmp_target = match.group()
                 tmp_parser = tmp_target.split(":")
                 if 0 <= int(tmp_parser[0]) <= 11:
-                    self.tp.tunit[3] = int(tmp_parser[0]) + 12
+                    self.tp.hour = int(tmp_parser[0]) + 12
                 else:
-                    self.tp.tunit[3] = int(tmp_parser[0])
+                    self.tp.hour = int(tmp_parser[0])
 
-                self.tp.tunit[4] = int(tmp_parser[1])
-                self.tp.tunit[5] = int(tmp_parser[2])
+                self.tp.minute = int(tmp_parser[1])
+                self.tp.second = int(tmp_parser[2])
                 # 处理倾向于未来时间的情况
                 self.preferFuture(3)
                 self.isAllDayTime = False
@@ -450,10 +430,10 @@ class TimeUnit:
                     tmp_target = match.group()
                     tmp_parser = tmp_target.split(":")
                     if 0 <= int(tmp_parser[0]) <= 11:
-                        self.tp.tunit[3] = int(tmp_parser[0]) + 12
+                        self.tp.hour = int(tmp_parser[0]) + 12
                     else:
-                        self.tp.tunit[3] = int(tmp_parser[0])
-                    self.tp.tunit[4] = int(tmp_parser[1])
+                        self.tp.hour = int(tmp_parser[0])
+                    self.tp.minute = int(tmp_parser[1])
                     # 处理倾向于未来时间的情况
                     self.preferFuture(3)
                     self.isAllDayTime = False
@@ -465,9 +445,9 @@ class TimeUnit:
             if match is not None:
                 tmp_target = match.group()
                 tmp_parser = tmp_target.split(":")
-                self.tp.tunit[3] = int(tmp_parser[0])
-                self.tp.tunit[4] = int(tmp_parser[1])
-                self.tp.tunit[5] = int(tmp_parser[2])
+                self.tp.hour = int(tmp_parser[0])
+                self.tp.minute = int(tmp_parser[1])
+                self.tp.second = int(tmp_parser[2])
                 # 处理倾向于未来时间的情况
                 self.preferFuture(3)
                 self.isAllDayTime = False
@@ -478,8 +458,8 @@ class TimeUnit:
                 if match is not None:
                     tmp_target = match.group()
                     tmp_parser = tmp_target.split(":")
-                    self.tp.tunit[3] = int(tmp_parser[0])
-                    self.tp.tunit[4] = int(tmp_parser[1])
+                    self.tp.hour = int(tmp_parser[0])
+                    self.tp.minute = int(tmp_parser[1])
                     # 处理倾向于未来时间的情况
                     self.preferFuture(3)
                     self.isAllDayTime = False
@@ -492,9 +472,9 @@ class TimeUnit:
         if match is not None:
             tmp_target = match.group()
             tmp_parser = tmp_target.split("-")
-            self.tp.tunit[0] = int(tmp_parser[0])
-            self.tp.tunit[1] = int(tmp_parser[1])
-            self.tp.tunit[2] = int(tmp_parser[2])
+            self.tp.year = int(tmp_parser[0])
+            self.tp.month = int(tmp_parser[1])
+            self.tp.day = int(tmp_parser[2])
 
         rule = (
             r"[0-9]?[0-9]?[0-9]{2}/((10)|(11)|(12)|([1-9]))/((?<!\d))([0-3][0-9]|[1-9])"
@@ -504,9 +484,9 @@ class TimeUnit:
         if match is not None:
             tmp_target = match.group()
             tmp_parser = tmp_target.split("/")
-            self.tp.tunit[0] = int(tmp_parser[0])
-            self.tp.tunit[1] = int(tmp_parser[1])
-            self.tp.tunit[2] = int(tmp_parser[2])
+            self.tp.year = int(tmp_parser[0])
+            self.tp.month = int(tmp_parser[1])
+            self.tp.day = int(tmp_parser[2])
 
         rule = (
             r"((10)|(11)|(12)|([1-9]))/((?<!\d))([0-3][0-9]|[1-9])/[0-9]?[0-9]?[0-9]{2}"
@@ -516,9 +496,9 @@ class TimeUnit:
         if match is not None:
             tmp_target = match.group()
             tmp_parser = tmp_target.split("/")
-            self.tp.tunit[1] = int(tmp_parser[0])
-            self.tp.tunit[2] = int(tmp_parser[1])
-            self.tp.tunit[0] = int(tmp_parser[2])
+            self.tp.month = int(tmp_parser[0])
+            self.tp.day = int(tmp_parser[1])
+            self.tp.year = int(tmp_parser[2])
 
         rule = r"[0-9]?[0-9]?[0-9]{2}\.((10)|(11)|(12)|([1-9]))\.((?<!\d))([0-3][0-9]|[1-9])"
         pattern = re.compile(rule)
@@ -526,9 +506,9 @@ class TimeUnit:
         if match is not None:
             tmp_target = match.group()
             tmp_parser = tmp_target.split(".")
-            self.tp.tunit[0] = int(tmp_parser[0])
-            self.tp.tunit[1] = int(tmp_parser[1])
-            self.tp.tunit[2] = int(tmp_parser[2])
+            self.tp.year = int(tmp_parser[0])
+            self.tp.month = int(tmp_parser[1])
+            self.tp.day = int(tmp_parser[2])
 
     def norm_setBaseRelated(self):
         """
@@ -536,7 +516,7 @@ class TimeUnit:
         :return:
         """
         logger.debug(f"设置以上文时间为基准的时间偏移计算: {self.exp_time}")
-        cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
+        cur = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
         flag = [False, False, False]
 
         rule = r"\d+(?=天[以之]?前)"
@@ -588,11 +568,11 @@ class TimeUnit:
             cur = cur.shift(years=year)
 
         if flag[0] or flag[1] or flag[2]:
-            self.tp.tunit[0] = int(cur.year)
+            self.tp.year = int(cur.year)
         if flag[1] or flag[2]:
-            self.tp.tunit[1] = int(cur.month)
+            self.tp.month = int(cur.month)
         if flag[2]:
-            self.tp.tunit[2] = int(cur.day)
+            self.tp.day = int(cur.day)
 
     # todo 时间长度相关
     def norm_setSpanRelated(self):
@@ -606,7 +586,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             month = int(match.group())
-            self.tp.tunit[1] = int(month)
+            self.tp.month = int(month)
 
         rule = r"\d+(?=天(?![以之]?[前后]))"
         pattern = re.compile(rule)
@@ -614,7 +594,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             day = int(match.group())
-            self.tp.tunit[2] = int(day)
+            self.tp.day = int(day)
 
         rule = r"\d+(?=(个)?小时(?![以之]?[前后]))"
         pattern = re.compile(rule)
@@ -622,7 +602,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             hour = int(match.group())
-            self.tp.tunit[3] = int(hour)
+            self.tp.hour = int(hour)
 
         rule = r"\d+(?=分钟(?![以之]?[前后]))"
         pattern = re.compile(rule)
@@ -630,7 +610,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             minute = int(match.group())
-            self.tp.tunit[4] = int(minute)
+            self.tp.minute = int(minute)
 
         rule = r"\d+(?=秒钟(?![以之]?[前后]))"
         pattern = re.compile(rule)
@@ -638,7 +618,7 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             second = int(match.group())
-            self.tp.tunit[5] = int(second)
+            self.tp.second = int(second)
 
         rule = r"\d+(?=(个)?(周|星期|礼拜)(?![以之]?[前后]))"
         pattern = re.compile(rule)
@@ -646,9 +626,9 @@ class TimeUnit:
         if match is not None:
             self.normalizer.isTimeSpan = True
             week = int(match.group())
-            if self.tp.tunit[2] == -1:
-                self.tp.tunit[2] = 0
-            self.tp.tunit[2] += int(week * 7)
+            if self.tp.day == -1:
+                self.tp.day = 0
+            self.tp.day += int(week * 7)
 
     # 节假日相关
     def norm_setHoliday(self):
@@ -662,8 +642,8 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.tunit[0] == -1:
-                self.tp.tunit[0] = int(self.normalizer.timeBase.split("-")[0])
+            if self.tp.year == -1:
+                self.tp.year = int(self.normalizer.baseTime.split("-")[0])
             holi = match.group()
             if "节" not in holi:
                 holi += "节"
@@ -672,18 +652,18 @@ class TimeUnit:
             elif holi in self.normalizer.lunar:
                 date = self.normalizer.lunar[holi].split("-")
                 lsConverter = LunarSolarConverter()
-                lunar = Lunar(self.tp.tunit[0], int(date[0]), int(date[1]), False)
+                lunar = Lunar(self.tp.year, int(date[0]), int(date[1]), False)
                 solar = lsConverter.LunarToSolar(lunar)
-                self.tp.tunit[0] = solar.solarYear
+                self.tp.year = solar.solarYear
                 date[0] = solar.solarMonth
                 date[1] = solar.solarDay
             else:
                 holi = holi.strip("节")
                 if holi in ["小寒", "大寒"]:
-                    self.tp.tunit[0] += 1
-                date = self.china_24_st(self.tp.tunit[0], holi)
-            self.tp.tunit[1] = int(date[0])
-            self.tp.tunit[2] = int(date[1])
+                    self.tp.year += 1
+                date = self.china_24_st(self.tp.year, holi)
+            self.tp.month = int(date[0])
+            self.tp.day = int(date[1])
 
     def china_24_st(self, year: int, china_st: str):
         """
@@ -796,7 +776,7 @@ class TimeUnit:
         :return:
         """
         # 这一块还是用了断言表达式
-        cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
+        cur = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
         flag = [False, False, False]
 
         rule = "前年"
@@ -995,30 +975,30 @@ class TimeUnit:
             cur = self.preferFutureWeek(week, cur)
 
         if flag[0] or flag[1] or flag[2]:
-            self.tp.tunit[0] = int(cur.year)
+            self.tp.year = int(cur.year)
         if flag[1] or flag[2]:
-            self.tp.tunit[1] = int(cur.month)
+            self.tp.month = int(cur.month)
         if flag[2]:
-            self.tp.tunit[2] = int(cur.day)
+            self.tp.day = int(cur.day)
 
     def modifyTimeBase(self):
         """
-        该方法用于更新timeBase使之具有上下文关联性
+        该方法用于更新baseTime使之具有上下文关联性
         :return:
         """
         if not self.normalizer.isTimeSpan:
-            if 30 <= self.tp.tunit[0] < 100:
-                self.tp.tunit[0] = 1900 + self.tp.tunit[0]
-            if 0 < self.tp.tunit[0] < 30:
-                self.tp.tunit[0] = 2000 + self.tp.tunit[0]
-            time_grid = self.normalizer.timeBase.split("-")
+            if 30 <= self.tp.year < 100:
+                self.tp.year = 1900 + self.tp.year
+            if 0 < self.tp.year < 30:
+                self.tp.year = 2000 + self.tp.year
+            time_grid = self.normalizer.baseTime.split("-")
             arr = []
             for i in range(0, 6):
                 if self.tp.tunit[i] == -1:
                     arr.append(str(time_grid[i]))
                 else:
                     arr.append(str(self.tp.tunit[i]))
-            self.normalizer.timeBase = "-".join(arr)
+            self.normalizer.baseTime = "-".join(arr)
 
     def preferFutureWeek(self, weekday, cur):
         # 1. 确认用户选项
@@ -1029,7 +1009,7 @@ class TimeUnit:
             if self.tp.tunit[i] != -1:
                 return cur
         # 获取当前是在周几，如果识别到的时间小于当前时间，则识别时间为下一周
-        tmp = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
+        tmp = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
         curWeekday = tmp.weekday()
         if curWeekday > weekday:
             cur = cur.shift(days=7)
@@ -1058,12 +1038,12 @@ class TimeUnit:
         if not self.normalizer.isPreferFuture:
             return
         # 5. 获取当前时间，如果识别到的时间小于当前时间，则将其上的所有级别时间设置为当前时间，并且其上一级的时间步长+1
-        time_arr = self.normalizer.timeBase.split("-")
-        cur = arrow.get(self.normalizer.timeBase, "YYYY-M-D-H-m-s")
+        time_arr = self.normalizer.baseTime.split("-")
+        cur = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
         cur_unit = int(time_arr[checkTimeIndex])
         logger.debug(time_arr)
         logger.debug(self.tp.tunit)
-        if self.tp.tunit[0] == -1:
+        if self.tp.year == -1:
             self._noyear = True
         else:
             self._noyear = False
@@ -1086,7 +1066,7 @@ class TimeUnit:
         :param parse: 解析出来的list
         :return:
         """
-        time_arr = self.normalizer.timeBase.split("-")
+        time_arr = self.normalizer.baseTime.split("-")
         if self._noyear:
             # check the month
             logger.debug(parse)
