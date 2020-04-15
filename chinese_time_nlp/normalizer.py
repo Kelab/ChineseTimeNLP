@@ -74,9 +74,7 @@ class TimeNormalizer:
         self.invalidSpan = False
         self.timeSpan = ""
         self.target = self._filter(target)
-        self.baseTime = arrow.get(baseTime).format("YYYY-M-D-H-m-s")
-        self.nowTime = baseTime
-        self.oldTimeBase = self.baseTime
+        self.baseTime = baseTime  # .format("YYYY-M-D-H-m-s")
         self.__preHandling()
         self.timeToken = self.__timeEx()
         dic = {}
@@ -127,10 +125,8 @@ class TimeNormalizer:
         self.target = StringPreHandler.numberTranslator(self.target)  # 大写数字转化
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
 
-    def __timeEx(self):
+    def __timeEx(self) -> List[TimeUnit]:
         """
-        :param target: 输入文本字符串
-        :param baseTime: 输入基准时间
         :return: TimeUnit[]时间表达式类型数组
         """
         startline = -1

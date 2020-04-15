@@ -1,5 +1,6 @@
+from chinese_time_nlp.utils import arrow2grid, grid2arrow
 from loguru import logger
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 import regex as re
 import arrow
@@ -82,7 +83,7 @@ class TimeUnit:
             logger.debug(f"时间段: {self.normalizer.timeSpan}")
             return
 
-        time_grid = self.normalizer.baseTime.split("-")
+        time_grid = arrow2grid(self.normalizer.baseTime)
         tunitpointer = 5
         while tunitpointer >= 0 and self.tp.tunit[tunitpointer] < 0:
             tunitpointer -= 1
@@ -516,7 +517,7 @@ class TimeUnit:
         :return:
         """
         logger.debug(f"设置以上文时间为基准的时间偏移计算: {self.exp_time}")
-        cur = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
+        cur = self.normalizer.baseTime
         flag = [False, False, False]
 
         rule = r"\d+(?=天[以之]?前)"
@@ -642,28 +643,31 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
+            month = 0
+            day = 0
             if self.tp.year == -1:
-                self.tp.year = int(self.normalizer.baseTime.split("-")[0])
+                year = arrow2grid(self.normalizer.baseTime)[0]
+                self.tp.year = int(year)
             holi = match.group()
             if "节" not in holi:
                 holi += "节"
             if holi in self.normalizer.solar:
-                date = self.normalizer.solar[holi].split("-")
+                month, day = self.normalizer.solar[holi].split("-")
             elif holi in self.normalizer.lunar:
                 date = self.normalizer.lunar[holi].split("-")
                 lsConverter = LunarSolarConverter()
                 lunar = Lunar(self.tp.year, int(date[0]), int(date[1]), False)
                 solar = lsConverter.LunarToSolar(lunar)
                 self.tp.year = solar.solarYear
-                date[0] = solar.solarMonth
-                date[1] = solar.solarDay
+                month = solar.solarMonth
+                day = solar.solarDay
             else:
                 holi = holi.strip("节")
                 if holi in ["小寒", "大寒"]:
                     self.tp.year += 1
-                date = self.china_24_st(self.tp.year, holi)
-            self.tp.month = int(date[0])
-            self.tp.day = int(date[1])
+                month, day = self.china_24_st(self.tp.year, holi)
+            self.tp.month = int(month)
+            self.tp.day = int(day)
 
     def china_24_st(self, year: int, china_st: str):
         """
@@ -776,7 +780,7 @@ class TimeUnit:
         :return:
         """
         # 这一块还是用了断言表达式
-        cur = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
+        cur = self.normalizer.baseTime
         flag = [False, False, False]
 
         rule = "前年"
@@ -991,14 +995,14 @@ class TimeUnit:
                 self.tp.year = 1900 + self.tp.year
             if 0 < self.tp.year < 30:
                 self.tp.year = 2000 + self.tp.year
-            time_grid = self.normalizer.baseTime.split("-")
+            time_grid = arrow2grid(self.normalizer.baseTime)
             arr = []
             for i in range(0, 6):
                 if self.tp.tunit[i] == -1:
                     arr.append(str(time_grid[i]))
                 else:
                     arr.append(str(self.tp.tunit[i]))
-            self.normalizer.baseTime = "-".join(arr)
+            self.normalizer.baseTime = grid2arrow(arr)
 
     def preferFutureWeek(self, weekday, cur):
         # 1. 确认用户选项
@@ -1009,7 +1013,7 @@ class TimeUnit:
             if self.tp.tunit[i] != -1:
                 return cur
         # 获取当前是在周几，如果识别到的时间小于当前时间，则识别时间为下一周
-        tmp = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
+        tmp = self.normalizer.baseTime
         curWeekday = tmp.weekday()
         if curWeekday > weekday:
             cur = cur.shift(days=7)
@@ -1038,8 +1042,8 @@ class TimeUnit:
         if not self.normalizer.isPreferFuture:
             return
         # 5. 获取当前时间，如果识别到的时间小于当前时间，则将其上的所有级别时间设置为当前时间，并且其上一级的时间步长+1
-        time_arr = self.normalizer.baseTime.split("-")
-        cur = arrow.get(self.normalizer.baseTime, "YYYY-M-D-H-m-s")
+        time_arr = arrow2grid(self.normalizer.baseTime)
+        cur = self.normalizer.baseTime
         cur_unit = int(time_arr[checkTimeIndex])
         logger.debug(time_arr)
         logger.debug(self.tp.tunit)
@@ -1066,7 +1070,7 @@ class TimeUnit:
         :param parse: 解析出来的list
         :return:
         """
-        time_arr = self.normalizer.baseTime.split("-")
+        time_arr = arrow2grid(self.normalizer.baseTime)
         if self._noyear:
             # check the month
             logger.debug(parse)
