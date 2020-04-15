@@ -5,7 +5,7 @@ from loguru import logger
 from .resource.pattern import r, pattern
 from .LunarSolarConverter import LunarSolarConverter
 from .StringPreHandler import StringPreHandler
-from .TimeNormalizer import TimeNormalizer
+from .normalizer import TimeNormalizer
 
 logger.remove()
 default_logger = logger.add(sys.stdout, level="INFO")

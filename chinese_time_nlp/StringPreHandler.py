@@ -69,10 +69,11 @@ class StringPreHandler:
         for m in match:
             target = pattern.sub(str(cls.wordToNumber(m.group())), target, 1)
 
+        # 星期天表达式替换为星期7
         pattern = re.compile(u"(?<=(周|星期))[末天日]")
         match = pattern.finditer(target)
         for m in match:
-            target = pattern.sub(str(cls.wordToNumber(m.group())), target, 1)
+            target = pattern.sub("7", target, 1)
 
         pattern = re.compile(u"(?<!(周|星期))0?[0-9]?十[0-9]?")
         match = pattern.finditer(target)
@@ -144,31 +145,31 @@ class StringPreHandler:
         :param s: 大写数字
         :return: 对应的整形数，如果不是数字返回-1
         """
-        if (s == u"零") or (s == "0"):
-            return 0
-        elif (s == u"一") or (s == "1"):
-            return 1
-        elif (s == u"二") or (s == u"两") or (s == "2"):
-            return 2
-        elif (s == u"三") or (s == "3"):
-            return 3
-        elif (s == u"四") or (s == "4"):
-            return 4
-        elif (s == u"五") or (s == "5"):
-            return 5
-        elif (s == u"六") or (s == "6"):
-            return 6
-        elif (s == u"七") or (s == u"天") or (s == u"日") or (s == u"末") or (s == "7"):
-            return 7
-        elif (s == u"八") or (s == "8"):
-            return 8
-        elif (s == u"九") or (s == "9"):
-            return 9
-        else:
-            return -1
+        return {
+            "零": 0,
+            "0": 0,
+            "一": 1,
+            "1": 1,
+            "二": 2,
+            "2": 2,
+            "三": 3,
+            "3": 3,
+            "四": 4,
+            "4": 4,
+            "五": 5,
+            "5": 5,
+            "六": 6,
+            "6": 6,
+            "七": 7,
+            "7": 7,
+            "八": 8,
+            "8": 8,
+            "九": 9,
+            "9": 9,
+        }.get(s, -1)
 
     @classmethod
-    def strToInt(cls, s):
+    def strToInt(cls, s: str):
         try:
             res = int(s)
         except Exception:

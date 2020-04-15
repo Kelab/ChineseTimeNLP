@@ -1,9 +1,9 @@
 import arrow
 import regex as re
 from loguru import logger
-
+from typing import List
 from .StringPreHandler import StringPreHandler
-from .TimePoint import TimePoint
+from .point import TimePoint
 from .TimeUnit import TimeUnit
 
 
@@ -153,9 +153,10 @@ class TimeNormalizer:
             rpointer += 1
         logger.debug("=======")
 
-        res = []
+        res: List[TimeUnit] = []
         # 时间上下文： 前一个识别出来的时间会是下一个时间的上下文，用于处理：周六3点到5点这样的多个时间的识别，第二个5点应识别到是周六的。
         contextTp = TimePoint()
+
         logger.debug(f"基础时间 {self.timeBase}")
         logger.debug(f"待处理的字段: {temp}")
         for i in range(0, rpointer):

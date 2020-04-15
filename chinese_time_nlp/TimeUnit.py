@@ -1,18 +1,23 @@
 from loguru import logger
+from typing import TYPE_CHECKING
 
 import regex as re
 import arrow
 import copy
-from .TimePoint import TimePoint
-from .RangeTimeEnum import RangeTimeEnum
+from .point import TimePoint
+from .enums import RangeTimeEnum
 from .LunarSolarConverter import Lunar, LunarSolarConverter
 
+if TYPE_CHECKING:
+    from .normalizer import TimeNormalizer
 
-# 时间语句分析
+
 class TimeUnit:
-    def __init__(self, exp_time, normalizer, contextTp):
-        """
-        exp_time: 时间表达式
+    def __init__(
+        self, exp_time: str, normalizer: "TimeNormalizer", contextTp: TimePoint
+    ):
+        """时间语句分析 \n
+        exp_time: 时间表达式 \n
         normalizer: TimeNormalizer 类
         """
         logger.debug(f"TimeUnit Init: {exp_time} {contextTp}")
