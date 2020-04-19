@@ -1,5 +1,5 @@
 from arrow import Arrow
-from chinese_time_nlp.helpers.arrow_helper import arrow2grid
+from .helpers.arrow_helper import arrow2grid
 
 
 class TimePoint:

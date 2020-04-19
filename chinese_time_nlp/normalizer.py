@@ -38,8 +38,7 @@ class TimeNormalizer:
         self.timeSpan = ""
         self.target = target
         self.baseTime = baseTime
-        self.__preHandling()
-        self.timeToken = self.__timeEx()
+        self.timeToken = self.extract()
         dic = {}
         res = self.timeToken
         if self.isTimeSpan:
@@ -78,7 +77,7 @@ class TimeNormalizer:
                 ]
         return dic
 
-    def __preHandling(self):
+    def pre(self):
         """
         待匹配字符串的清理空白符和语气助词以及大写数字转化的预处理
         :return:
@@ -89,10 +88,11 @@ class TimeNormalizer:
         self.target = number_translator(self.target)  # 大写数字转化
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
 
-    def __timeEx(self) -> List[TimeUnit]:
+    def extract(self) -> List[TimeUnit]:
         """
         :return: TimeUnit[]时间表达式类型数组
         """
+        self.pre()
         startline = -1
         endline = -1
         rpointer = 0
@@ -118,21 +118,21 @@ class TimeNormalizer:
         # 时间上下文： 前一个识别出来的时间会是下一个时间的上下文，用于处理：周六3点到5点这样的多个时间的识别，第二个5点应识别到是周六的。
         contextTp = TimePoint()
 
-        logger.debug(f"基础时间 {self.baseTime}")
+        logger.debug(f"基础时间： {self.baseTime}")
         logger.debug(f"待处理的字段: {temp}")
-        logger.debug(f"rpointer: {rpointer}")
+        logger.debug(f"当前处理字段指针: {rpointer}")
         for i in range(0, rpointer):
             # 这里是一个类嵌套了一个类
             res.append(TimeUnit(temp[i], self, contextTp))
             contextTp = res[i].tp
 
-        logger.debug(f"时间表达式类型数组 {res}")
-        res = self.__filterTimeUnit(res)
+        logger.debug(f"时间表达式类型数组： {res}")
+        res = self.filter(res)
         return res
 
-    def __filterTimeUnit(self, tu_arr: List[TimeUnit]):
+    def filter(self, tu_arr: List[TimeUnit]):
         """
-        过滤timeUnit中无用的识别词。无用识别词识别出的时间是1970.01.01 00:00:00(fastTime=0)
+        过滤timeUnit中无用的识别词。
         :return:
         """
         if (tu_arr is None) or (len(tu_arr) < 1):
@@ -141,5 +141,5 @@ class TimeNormalizer:
         for tu in tu_arr:
             if tu.time.timestamp != 0:
                 res.append(tu)
-        logger.debug(f"过滤timeUnit中无用的识别词 {res}")
+        logger.debug(f"过滤不能识别的字段。 {res}")
         return res
