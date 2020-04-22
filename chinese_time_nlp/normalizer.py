@@ -10,6 +10,7 @@ from .helpers.str_common import (
 )
 from .point import TimePoint
 from .unit import TimeUnit
+from .result import Result
 
 
 # 时间表达式识别的主要工作类
@@ -21,7 +22,7 @@ class TimeNormalizer:
 
         self.pattern = pattern
 
-    def parse(self, target: str, baseTime=None) -> dict:
+    def parse(self, target: str, baseTime: arrow.Arrow = None) -> dict:
         """
         TimeNormalizer的构造方法，baseTime取默认的系统当前时间
         :param baseTime: 基准时间点
@@ -39,43 +40,18 @@ class TimeNormalizer:
         self.target = target
         self.baseTime = baseTime
         self.timeToken = self.extract()
-        dic = {}
-        res = self.timeToken
         if self.isTimeSpan:
             if self.invalidSpan:
-                dic["type"] = "error"
-                dic["error"] = "no time pattern could be extracted."
+                return Result.from_invalid()
             else:
-                result = {}
-                dic["type"] = "timedelta"
-                dic["timedelta"] = self.timeSpan
-                logger.debug(f"timedelta: {dic['timedelta']}")
-                index = dic["timedelta"].find("days")
-                days = int(dic["timedelta"][: index - 1])
-                result["year"] = int(days / 365)
-                result["month"] = int(days / 30 - result["year"] * 12)
-                result["day"] = int(days - result["year"] * 365 - result["month"] * 30)
-                index = dic["timedelta"].find(",")
-                time = dic["timedelta"][index + 1 :]
-                time = time.split(":")
-                result["hour"] = int(time[0])
-                result["minute"] = int(time[1])
-                result["second"] = int(time[2])
-                dic["timedelta"] = result
+                return Result.from_timedelta(self.timeSpan)
         else:
-            if len(res) == 0:
-                dic["type"] = "error"
-                dic["error"] = "no time pattern could be extracted."
-            elif len(res) == 1:
-                dic["type"] = "timestamp"
-                dic["timestamp"] = res[0].time.format("YYYY-MM-DD HH:mm:ss")
+            if len(self.timeToken) == 0:
+                return Result.from_invalid()
+            elif len(self.timeToken) == 1:
+                return Result.from_timestamp(self.timeToken)
             else:
-                dic["type"] = "timespan"
-                dic["timespan"] = [
-                    res[0].time.format("YYYY-MM-DD HH:mm:ss"),
-                    res[1].time.format("YYYY-MM-DD HH:mm:ss"),
-                ]
-        return dic
+                return Result.from_timespan(self.timeToken)
 
     def pre(self):
         """
