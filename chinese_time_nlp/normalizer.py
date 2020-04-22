@@ -56,7 +56,6 @@ class TimeNormalizer:
     def pre(self):
         """
         待匹配字符串的清理空白符和语气助词以及大写数字转化的预处理
-        :return:
         """
         self.target = filter_irregular_expression(self.target)
         self.target = del_keyword(self.target, r"\s+")  # 清理空白符
@@ -65,8 +64,7 @@ class TimeNormalizer:
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
 
     def extract(self) -> List[TimeUnit]:
-        """
-        :return: TimeUnit[]时间表达式类型数组
+        """返回 TimeUnit[] 时间表达式类型数组
         """
         self.pre()
         startline = -1
@@ -109,7 +107,6 @@ class TimeNormalizer:
     def filter(self, tu_arr: List[TimeUnit]):
         """
         过滤timeUnit中无用的识别词。
-        :return:
         """
         if (tu_arr is None) or (len(tu_arr) < 1):
             return tu_arr

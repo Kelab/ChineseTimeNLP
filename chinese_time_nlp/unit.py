@@ -112,7 +112,6 @@ class TimeUnit:
     def norm_setyear(self):
         """
         年-规范化方法--该方法识别时间表达式单元的年字段
-        :return:
         """
         # xx年后
         rule = r"([0-9]{1,})(?=年后)"
@@ -159,7 +158,6 @@ class TimeUnit:
     def norm_setmonth(self):
         """
         月-规范化方法--该方法识别时间表达式单元的月字段
-        :return:
         """
         rule = r"((10)|(11)|(12)|([1-9]))(?=月)"
         pattern = re.compile(rule)
@@ -172,7 +170,6 @@ class TimeUnit:
     def norm_setmonth_fuzzyday(self):
         """
         月-日 兼容模糊写法：该方法识别时间表达式单元的月、日字段
-        :return:
         """
         rule = r"((10)|(11)|(12)|([1-9]))(月|\.|\-)([0-3][0-9]|[1-9])"
         pattern = re.compile(rule)
@@ -194,7 +191,6 @@ class TimeUnit:
     def norm_setday(self):
         """
         日-规范化方法：该方法识别时间表达式单元的日字段
-        :return:
         """
         rule = r"((?<!\d))([0-3][0-9]|[1-9])(?=(日|号))"
         pattern = re.compile(rule)
@@ -303,7 +299,6 @@ class TimeUnit:
     def norm_sethour(self):
         """
         时-规范化方法：该方法识别时间表达式单元的时字段
-        :return:
         """
         rule = r"(?<!(周|星期))([0-2]?[0-9])(?=(点|时))"
         pattern = re.compile(rule)
@@ -320,7 +315,6 @@ class TimeUnit:
     def norm_setminute(self):
         """
         分-规范化方法：该方法识别时间表达式单元的分字段
-        :return:
         """
         rule = r"([0-9]+(?=分(?!钟)))|((?<=((?<!小)[点时]))[0-5]?[0-9](?!刻))"
         pattern = re.compile(rule)
@@ -362,7 +356,6 @@ class TimeUnit:
     def norm_setsecond(self):
         """
         添加了省略“秒”说法的时间：如17点15分32
-        :return:
         """
         rule = r"([0-9]+(?=秒))|((?<=分)[0-5]?[0-9])"
         pattern = re.compile(rule)
@@ -374,7 +367,6 @@ class TimeUnit:
     def norm_setSpecial(self):
         """
         特殊形式的规范化方法-该方法识别特殊形式的时间表达式单元的各个字段
-        :return:
         """
         rule = r"(晚上|夜间|夜里|今晚|明晚|晚|夜里|下午|午后)(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9]"
         pattern = re.compile(rule)
@@ -530,7 +522,6 @@ class TimeUnit:
     def norm_setBaseRelated(self):
         """
         设置以上文时间为基准的时间偏移计算
-        :return:
         """
         logger.debug(f"设置以上文时间为基准的时间偏移计算: {self.exp_time}")
         cur = self.normalizer.baseTime
@@ -595,7 +586,6 @@ class TimeUnit:
     def norm_setSpanRelated(self):
         """
         设置时间长度相关的时间表达式
-        :return:
         """
         rule = r"\d+(?=个月(?![以之]?[前后]))"
         pattern = re.compile(rule)
@@ -793,7 +783,6 @@ class TimeUnit:
     def norm_setCurRelated(self):
         """
         设置当前时间相关的时间表达式
-        :return:
         """
         # 这一块还是用了断言表达式
         cur = self.normalizer.baseTime
@@ -1004,7 +993,6 @@ class TimeUnit:
     def modifyTimeBase(self):
         """
         该方法用于更新baseTime使之具有上下文关联性
-        :return:
         """
         if not self.normalizer.isTimeSpan:
             if 30 <= self.tp.year < 100:
@@ -1041,7 +1029,6 @@ class TimeUnit:
         如在晚上说“早上8点看书”，则识别为明天早上;
         12月31日说“3号买菜”，则识别为明年1月的3号。
         :param checkTimeIndex: _tp.tunit时间数组的下标
-        :return:
         """
         # 1. 检查被检查的时间级别之前，是否没有更高级的已经确定的时间，如果有，则不进行处理.
         for i in range(0, checkTimeIndex):
@@ -1084,7 +1071,6 @@ class TimeUnit:
         """
         检查未来时间点
         :param parse: 解析出来的list
-        :return:
         """
         time_arr = arrow2grid(self.normalizer.baseTime)
         if self._noyear:
@@ -1100,7 +1086,6 @@ class TimeUnit:
         """
         根据上下文时间补充时间信息
         :param checkTimeIndex:
-        :return:
         """
         for i in range(0, checkTimeIndex):
             if self.tp.tunit[i] == -1 and self.tp_origin.tunit[i] != -1:
