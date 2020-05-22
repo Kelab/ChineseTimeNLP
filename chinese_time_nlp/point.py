@@ -1,5 +1,6 @@
 from arrow import Arrow
 from .helpers.arrow_helper import arrow2grid
+from .result import DeltaType
 
 
 class TimePoint:
@@ -66,11 +67,24 @@ class TimePoint:
     def second(self, value: int):
         self.tunit[5] = value
 
-    def get_today_seconds(self):
-        hour = max(self.hour, 0)
-        minute = max(self.minute, 0)
-        second = max(self.second, 0)
-        return hour * 3600 + minute * 60 + second
+    def is_valid(self):
+        flag = 0
+        for i in self.tunit:
+            if i > 0:
+                flag = 1
+                return True
+        if flag == 0:
+            return False
+
+    def gen_delta(self) -> DeltaType:
+        return {
+            "year": max(self.year, 0),
+            "month": max(self.month, 0),
+            "day": max(self.day, 0),
+            "hour": max(self.hour, 0),
+            "minute": max(self.minute, 0),
+            "second": max(self.second, 0),
+        }
 
     def get_arrow(self) -> Arrow:
         year = max(self.year, 1)

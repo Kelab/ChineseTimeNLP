@@ -1,16 +1,16 @@
-from typing import List
+from typing import List, Optional
 
 import arrow
 from loguru import logger
 
 from .helpers.str_common import (
     del_keyword,
-    number_translator,
     filter_irregular_expression,
+    number_translator,
 )
 from .point import TimePoint
+from .result import Result, DeltaType
 from .unit import TimeUnit
-from .result import Result
 
 
 # 时间表达式识别的主要工作类
@@ -34,24 +34,11 @@ class TimeNormalizer:
 
         logger.debug(f"目标字符串: {target}")
 
-        self.isTimeSpan = False
-        self.invalidSpan = False
-        self.timeSpan = ""
+        self.isTimeDelta = False
+        self.timeDelta = None  # type: Optional[DeltaType]
         self.target = target
         self.baseTime = baseTime
-        self.timeToken = self.extract()
-        if self.isTimeSpan:
-            if self.invalidSpan:
-                return Result.from_invalid()
-            else:
-                return Result.from_timedelta(self.timeSpan)
-        else:
-            if len(self.timeToken) == 0:
-                return Result.from_invalid()
-            elif len(self.timeToken) == 1:
-                return Result.from_timestamp(self.timeToken)
-            else:
-                return Result.from_timespan(self.timeToken)
+        return self.extract()
 
     def pre(self):
         """
@@ -63,7 +50,7 @@ class TimeNormalizer:
         self.target = number_translator(self.target)  # 大写数字转化
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
 
-    def extract(self) -> List[TimeUnit]:
+    def extract(self) -> dict:
         """返回 TimeUnit[] 时间表达式类型数组
         """
         self.pre()
@@ -102,7 +89,15 @@ class TimeNormalizer:
 
         logger.debug(f"全部字段处理后的结果： {res}")
         res = self.filter(res)
-        return res
+
+        if self.isTimeDelta and self.timeDelta:
+            return Result.from_timedelta(self.timeDelta)
+        if len(res) == 1:
+            return Result.from_timestamp(res)
+        if len(res) == 2:
+            return Result.from_timespan(res)
+
+        return Result.from_invalid()
 
     def filter(self, tu_arr: List[TimeUnit]):
         """

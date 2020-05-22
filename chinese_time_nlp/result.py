@@ -1,4 +1,5 @@
-from typing import Literal, Tuple, List, TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, List, Literal, Tuple, TypedDict
+
 from loguru import logger
 
 if TYPE_CHECKING:
@@ -20,24 +21,9 @@ class Result(dict):
         return Error(error="no time pattern could be extracted.")
 
     @staticmethod
-    def from_timedelta(time_str="") -> "Delta":
-        logger.debug(f"timedelta: {time_str}")
-        index = time_str.find("days")
-        days = int(time_str[: index - 1])
-        year = int(days / 365)
-        month = int(days / 30 - year * 12)
-        day = int(days - year * 365 - month * 30)
-        index = time_str.find(",")
-        time = time_str[index + 1 :]
-        time = time.split(":")
-        hour = int(time[0])
-        minute = int(time[1])
-        second = int(time[2])
-        return Delta(
-            DeltaType(
-                year=year, month=month, day=day, hour=hour, minute=minute, second=second
-            )
-        )
+    def from_timedelta(delta_dict: DeltaType) -> "Delta":
+        logger.debug(f"time_delta: {delta_dict}")
+        return Delta(delta_dict)
 
     @staticmethod
     def from_timestamp(result: List["TimeUnit"]) -> "Stamp":

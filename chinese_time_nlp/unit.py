@@ -39,10 +39,10 @@ class TimeUnit:
         self.time_normalization()
 
     def __repr__(self):
-        if self.normalizer.isTimeSpan:
-            return str(self.normalizer.timeSpan)
+        if self.normalizer.isTimeDelta:
+            return f"<TimeUnit(Delta) {self.normalizer.timeDelta})"
         else:
-            return str(self.time)
+            return f"<TimeUnit {self.time}"
 
     def time_normalization(self):
         self.norm_setyear()
@@ -69,27 +69,19 @@ class TimeUnit:
                 spanFlag = False
 
         if spanFlag:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
 
-        if self.normalizer.isTimeSpan:
-            logger.debug("判断是时间段")
+        if self.normalizer.isTimeDelta:
+            logger.debug("isTimeDelta")
         else:
             logger.debug("判断是时间点")
 
-        if self.normalizer.isTimeSpan:
-            days = 0
-            if self.tp.year > 0:
-                days += 365 * self.tp.year
-            if self.tp.month > 0:
-                days += 30 * self.tp.month
-            if self.tp.day > 0:
-                days += self.tp.day
-
-            seconds = self.tp.get_today_seconds()
-            if seconds == 0 and days == 0:
-                self.normalizer.invalidSpan = True
-            self.normalizer.timeSpan = self.genSpan(days, seconds)
-            logger.debug(f"时间段: {self.normalizer.timeSpan}")
+        if self.normalizer.isTimeDelta:
+            if not self.tp.is_valid():
+                logger.debug("self.tp is invalid.")
+                return
+            self.normalizer.timeDelta = self.tp.gen_delta()
+            logger.debug(f"时间间隔: {self.normalizer.timeDelta}")
             return
 
         time_grid = arrow2grid(self.normalizer.baseTime)
@@ -102,13 +94,6 @@ class TimeUnit:
 
         self.time = self.tp.get_arrow()
         logger.debug(f"时间点: {self.time}")
-
-    def genSpan(self, days, seconds):
-        day = int(seconds / (3600 * 24))
-        h = int((seconds % (3600 * 24)) / 3600)
-        m = int(((seconds % (3600 * 24)) % 3600) / 60)
-        s = int(((seconds % (3600 * 24)) % 3600) % 60)
-        return str(days + day) + " days, " + "%d:%02d:%02d" % (h, m, s)
 
     def norm_setyear(self):
         """
@@ -127,7 +112,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             year = int(match.group())
             self.tp.year = year
 
@@ -144,7 +129,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             year = int(match.group())
             self.tp.year = year
 
@@ -206,7 +191,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             self.tp.day = int(match.group())
             self._check_time(self.tp.tunit)
 
@@ -592,7 +577,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             month = int(match.group())
             self.tp.month = int(month)
 
@@ -600,7 +585,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             day = int(match.group())
             self.tp.day = int(day)
 
@@ -608,7 +593,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             hour = int(match.group())
             self.tp.hour = int(hour)
 
@@ -616,7 +601,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             minute = int(match.group())
             self.tp.minute = int(minute)
 
@@ -624,7 +609,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             second = int(match.group())
             self.tp.second = int(second)
 
@@ -632,7 +617,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            self.normalizer.isTimeSpan = True
+            self.normalizer.isTimeDelta = True
             week = int(match.group())
             if self.tp.day == -1:
                 self.tp.day = 0
@@ -993,7 +978,7 @@ class TimeUnit:
         """
         该方法用于更新baseTime使之具有上下文关联性
         """
-        if not self.normalizer.isTimeSpan:
+        if not self.normalizer.isTimeDelta:
             if 30 <= self.tp.year < 100:
                 self.tp.year = 1900 + self.tp.year
             if 0 < self.tp.year < 30:
