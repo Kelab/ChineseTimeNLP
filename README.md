@@ -13,6 +13,7 @@
 - Python2 版本 <https://github.com/ryanInf/Time-NLPY/tree/Python2%E7%89%88%E6%9C%AC>
 - Python3 版本 <https://github.com/ryanInf/Time-NLPY>
 - Java 版本 <https://github.com/shinyke/Time-NLP>
+- PHP 版本 <https://github.com/crazywhalecc/Time-NLP-PHP>
 
 ## 配置
 

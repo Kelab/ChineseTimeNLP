@@ -33,6 +33,7 @@ class TimeUnit:
         self.tp = TimePoint()
         self.tp_origin = contextTp
         self.isFirstTimeSolveContext = True
+        self.isMorning = False
         self.isAllDayTime = True
         self.time = arrow.now("Asia/Shanghai")
         self.time_normalization()
@@ -1036,10 +1037,11 @@ class TimeUnit:
                 return
         # 2. 根据上下文补充时间
         self.checkContextTime(checkTimeIndex)
-        # 3. 根据上下文补充时间后再次检查被检查的时间级别之前，是否没有更高级的已经确定的时间，如果有，则不进行倾向处理.
-        for i in range(0, checkTimeIndex):
-            if self.tp.tunit[i] != -1:
-                return
+        # 3. 根据上下文补充时间后再次检查被检查的时间级别之前，是否没有更高级的已经确定的时间，如果有，则不进行倾向处理
+        # TODO 确认是否可以删除掉.
+        # for i in range(0, checkTimeIndex):
+        #     if self.tp.tunit[i] != -1:
+        #         return
 
         # 4. 确认用户选项
         if not self.normalizer.isPreferFuture:
@@ -1087,6 +1089,8 @@ class TimeUnit:
         根据上下文时间补充时间信息
         :param checkTimeIndex:
         """
+        if not self.isFirstTimeSolveContext:
+            return
         for i in range(0, checkTimeIndex):
             if self.tp.tunit[i] == -1 and self.tp_origin.tunit[i] != -1:
                 self.tp.tunit[i] = self.tp_origin.tunit[i]
