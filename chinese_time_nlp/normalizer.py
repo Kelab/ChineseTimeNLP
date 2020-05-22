@@ -94,25 +94,26 @@ class TimeNormalizer:
 
         logger.debug(f"基础时间： {self.baseTime}")
         logger.debug(f"待处理的字段: {temp}")
-        logger.debug(f"当前处理字段指针: {rpointer}")
+        logger.debug(f"待处理字段长度: {rpointer}")
         for i in range(0, rpointer):
             # 这里是一个类嵌套了一个类
             res.append(TimeUnit(temp[i], self, contextTp))
             contextTp = res[i].tp
 
-        logger.debug(f"时间表达式类型数组： {res}")
+        logger.debug(f"全部字段处理后的结果： {res}")
         res = self.filter(res)
         return res
 
     def filter(self, tu_arr: List[TimeUnit]):
         """
-        过滤timeUnit中无用的识别词。
+        过滤掉无效识别。
         """
-        if (tu_arr is None) or (len(tu_arr) < 1):
-            return tu_arr
         res = []
         for tu in tu_arr:
+            if not tu:
+                continue
+
             if tu.time.timestamp != 0:
                 res.append(tu)
-        logger.debug(f"过滤不能识别的字段。 {res}")
+        logger.debug(f"过滤无效识别后： {res}")
         return res

@@ -13,6 +13,11 @@ class TimePoint:
         #             0年 1月 2日 3时 4分 5秒
         self.tunit = [-1, -1, -1, -1, -1, -1]
 
+    def copy(self) -> "TimePoint":
+        new_instance = TimePoint()
+        new_instance.tunit = self.tunit.copy()
+        return new_instance
+
     @property
     def year(self) -> int:
         return self.tunit[0]

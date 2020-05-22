@@ -23,7 +23,7 @@ class TimeUnit:
         exp_time: 时间表达式 \n
         normalizer: TimeNormalizer 类
         """
-        logger.debug(f"TimeUnit 初始化:")
+        logger.debug("TimeUnit 初始化:")
         logger.debug(f"          字段: {exp_time}")
         logger.debug(f"         上下文: {contextTp}")
 
@@ -60,7 +60,7 @@ class TimeUnit:
         self.modifyTimeBase()
 
         self.tp_origin.tunit = copy.deepcopy(self.tp.tunit)
-        logger.debug(f"self.tp {self.tp}")
+        logger.debug(f"self.tp: {self.tp}")
 
         # 判断是时间点还是时间区间
         spanFlag = True
@@ -948,8 +948,6 @@ class TimeUnit:
                 week = 1
             week -= 1
             span = week - cur.weekday()
-            logger.info(cur)
-
             cur = cur.shift(weeks=1, days=span)
 
         # 这里对下下下周的时间转换做出了改善
