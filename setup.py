@@ -1,18 +1,29 @@
-from setuptools import setup
+import pathlib
+
 import setuptools
+from setuptools import setup
+
+HERE = pathlib.Path(__file__).parent
+
+with open(HERE / "README.md", encoding="utf-8") as f:
+    README = f.read()
+
+
+with open("requirements.txt") as f:
+    install_requires = [line for line in f if line and line[0] not in "#-"]
 
 setup(
     name="ChineseTimeNLP",
-    version="1.1.5",
-    keywords=("time", "nlp"),
-    author="BuddingLab",
+    version="2.0.0",
+    keywords=("time", "nlp", "time nlp"),
+    author="BudyLab",
     author_email="lengthmin@gmail.com",
-    description="...",
-    long_description="...",
+    long_description_content_type="text/markdown",
+    description="将中文时间表达词转为相应的时间",
+    long_description=README,
     license="MIT Licence",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=["regex>=2017", "arrow>=0.15.2"],
-    zip_safe=False,
+    install_requires=install_requires,
     classifiers=["Programming Language :: Python :: 3.7"],
 )
