@@ -16,6 +16,7 @@ setup(
     name="ChineseTimeNLP",
     version="2.0.0",
     keywords=("time", "nlp", "time nlp"),
+    url="https://github.com/BudyLab/ChineseTimeNLP",
     author="BudyLab",
     author_email="lengthmin@gmail.com",
     long_description_content_type="text/markdown",
