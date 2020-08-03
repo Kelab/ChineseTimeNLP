@@ -14,7 +14,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="ChineseTimeNLP",
-    version="2.0.0",
+    version="3.0.0",
     keywords=("time", "nlp", "time nlp"),
     url="https://github.com/BudyLab/ChineseTimeNLP",
     author="BudyLab",
