@@ -1,4 +1,4 @@
-# Chinese_Time_NLP
+# ChineseTimeNLP
 
 [![PyPI](https://img.shields.io/pypi/v/ChineseTimeNLP.svg)](https://pypi.python.org/pypi/ChineseTimeNLP)
 ![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
@@ -17,7 +17,7 @@
 
 ## 配置
 
-可以传入自定义的 pattern，默认 pattern 也可以通过 `from chinese_time_nlp import pattern` 导入。
+可以传入自定义的 pattern，默认 pattern 也可以通过 `from ChineseTimeNLP import pattern` 导入。
 
 ```py
 TimeNormalizer(isPreferFuture=True, pattern=None):
@@ -36,7 +36,7 @@ pip install ChineseTimeNLP
 使用:
 
 ```py
-from chinese_time_nlp import TimeNormalizer
+from ChineseTimeNLP import TimeNormalizer
 tn = TimeNormalizer()
 res = tn.parse(target=u"三天后")  # target 为待分析语句，baseTime 为基准时间默认是当前时间
 print(res)

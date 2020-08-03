@@ -1,5 +1,5 @@
 import sys
-from chinese_time_nlp import TimeNormalizer, logger_format  # 引入包
+from ChineseTimeNLP import TimeNormalizer, logger_format  # 引入包
 from loguru import logger
 
 
