@@ -4,12 +4,16 @@
 ![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+[![Downloads](https://pepy.tech/badge/chinesetimenlp)](https://pepy.tech/project/chinesetimenlp)
+[![Downloads](https://pepy.tech/badge/chinesetimenlp/week)](https://pepy.tech/project/chinesetimenlp)
+
 ## 简介
 
 这是 Time-NLP 的 Python3 版本。  
+fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)  
+
 相关链接：
 
-- Python 版本 <https://github.com/sunfiyes/Time-NLPY>
 - Python2 版本 <https://github.com/ryanInf/Time-NLPY/tree/Python2%E7%89%88%E6%9C%AC>
 - Python3 版本 <https://github.com/ryanInf/Time-NLPY>
 - Java 版本 <https://github.com/shinyke/Time-NLP>
@@ -194,7 +198,7 @@ temp []
 
 ## 声明
 
-fork 自 [zhanzecheng/Time_NLP](https://github.com/zhanzecheng/Time_NLP)，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
+，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
 
 ```python
 # -*- coding: utf-8 -*-
