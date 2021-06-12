@@ -45,28 +45,6 @@ tn = TimeNormalizer()
 res = tn.parse(target=u"三天后")  # target 为待分析语句，baseTime 为基准时间默认是当前时间
 print(res)
 ```
-
-## 本地开发
-
-开发前安装依赖
-
-```bash
-pip install -r requirements.txt
-```
-
-在本地安装
-
-```bash
-python setup.py install
-```
-
-生成包:
-
-```bash
-# 按照不同系统生成
-python setup.py sdist bdist_wheel
-```
-
 ## 功能说明
 
 用于句子中时间词的抽取和转换  
@@ -198,7 +176,7 @@ temp []
 
 ## 声明
 
-，为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
+为了适合自己的编程习惯，删除了代码中部分文件的头部注释信息，信息格式如下，特此声明：
 
 ```python
 # -*- coding: utf-8 -*-
