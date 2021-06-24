@@ -35,7 +35,7 @@ class TimeUnit:
         self.isFirstTimeSolveContext = True
         self.isMorning = False
         self.isAllDayTime = True
-        self.time = arrow.now("Asia/Shanghai")
+        self.time = normalizer.baseTime
         self._baseTime = normalizer._baseTime
         self.time_normalization()
 

@@ -16,11 +16,12 @@ from .unit import TimeUnit
 
 # 时间表达式识别的主要工作类
 class TimeNormalizer:
-    def __init__(self, isPreferFuture=True, pattern=None):
+    def __init__(self, isPreferFuture=True, tz="Asia/Shanghai", pattern=None):
         self.isPreferFuture = isPreferFuture
         if pattern is None:
             from .resource.pattern import pattern
 
+        self.tz = tz
         self.pattern = pattern
 
     def parse(self, target: str, baseTime: Union[arrow.Arrow, str] = None) -> dict:
@@ -31,7 +32,7 @@ class TimeNormalizer:
         :return: 时间单元数组
         """
         if baseTime is None:
-            baseTime = arrow.now("Asia/Shanghai")
+            baseTime = arrow.now(self.tz)
 
         logger.debug(f"目标字符串: {target}")
 
