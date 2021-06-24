@@ -1,5 +1,5 @@
 from arrow import Arrow
-from .helpers.arrow_helper import arrow2grid
+from .helpers.arrow_helper import arrow2tp
 from .result import DeltaType
 
 
@@ -96,7 +96,7 @@ class TimePoint:
         return Arrow(year, month, day, hour, minute, second)
 
     def set_unit(self, arrow: Arrow):
-        self.tunit = list(map(int, arrow2grid(arrow)))
+        self.tunit = arrow2tp(arrow)
 
     def __repr__(self) -> str:
         return str(self.tunit)
