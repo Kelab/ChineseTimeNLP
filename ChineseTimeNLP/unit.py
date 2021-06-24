@@ -1,5 +1,5 @@
 import copy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Pattern
 
 import arrow
 import regex as re
@@ -36,6 +36,7 @@ class TimeUnit:
         self.isMorning = False
         self.isAllDayTime = True
         self.time = arrow.now("Asia/Shanghai")
+        self.now = arrow.now("Asia/Shanghai")
         self.time_normalization()
 
     def __repr__(self):
@@ -770,9 +771,16 @@ class TimeUnit:
         """
         设置当前时间相关的时间表达式
         """
-        # 这一块还是用了断言表达式
         cur = self.normalizer.baseTime
+        # 年 月 日
         flag = [False, False, False]
+
+        def set_curr_month():
+            nonlocal flag
+            nonlocal cur
+
+            flag[1] = True
+            cur = cur.replace(month=self.now.month)
 
         rule = r"前年"
         pattern = re.compile(rule)
@@ -850,13 +858,17 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
+            flag[1] = True
+            cur = cur.replace(month=self.now.month)
             flag[2] = True
             cur = cur.shift(days=-2)
 
         rule = r"昨"
-        pattern = re.compile(rule)
+        pattern: Pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
+
         if match is not None:
+            set_curr_month()
             flag[2] = True
             cur = cur.shift(days=-1)
 
@@ -864,6 +876,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
+            set_curr_month()
             flag[2] = True
             cur = cur.shift(days=0)
 
@@ -871,6 +884,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
+            set_curr_month()
             flag[2] = True
             cur = cur.shift(days=1)
 
@@ -878,6 +892,7 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
+            set_curr_month()
             flag[2] = True
             cur = cur.shift(days=2)
 
@@ -885,11 +900,11 @@ class TimeUnit:
         pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
+            set_curr_month()
             rule = "大"
             pattern = re.compile(rule)
             match = pattern.findall(self.exp_time)
             flag[2] = True
-
             cur = cur.shift(days=(2 + len(match)))
 
         # todo 补充星期相关的预测 done

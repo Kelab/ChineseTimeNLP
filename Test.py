@@ -8,6 +8,11 @@ default_logger = logger.add(sys.stdout, format=logger_format, level="DEBUG")
 
 tn = TimeNormalizer(isPreferFuture=False)
 
+
+res = tn.parse(target="从去年到明天")  # target为待分析语句，baseTime为基准时间默认是当前时间
+print(res)
+print("====\n")
+
 res = tn.parse(target="半小时后")  # target为待分析语句，baseTime为基准时间默认是当前时间
 print(res)
 print("====\n")
