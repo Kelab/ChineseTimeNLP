@@ -1,7 +1,8 @@
 import sys
-from ChineseTimeNLP import TimeNormalizer, logger_format  # 引入包
+
 from loguru import logger
 
+from ChineseTimeNLP import TimeNormalizer, logger_format  # 引入包
 
 logger.remove()
 default_logger = logger.add(sys.stdout, format=logger_format, level="DEBUG")

@@ -10,7 +10,7 @@ from .helpers.str_common import (
     number_translator,
 )
 from .point import TimePoint
-from .result import Result, DeltaType
+from .result import DeltaType, Result
 from .unit import TimeUnit
 
 
