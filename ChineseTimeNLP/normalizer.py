@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import arrow
+from arrow.arrow import Arrow
 from loguru import logger
 
 from .helpers.str_common import (
@@ -22,7 +23,7 @@ class TimeNormalizer:
 
         self.pattern = pattern
 
-    def parse(self, target: str, baseTime: arrow.Arrow = None) -> dict:
+    def parse(self, target: str, baseTime: Union[arrow.Arrow, str] = None) -> dict:
         """
         TimeNormalizer的构造方法，baseTime取默认的系统当前时间
         :param baseTime: 基准时间点
@@ -37,7 +38,8 @@ class TimeNormalizer:
         self.isTimeDelta = False
         self.timeDelta = None  # type: Optional[DeltaType]
         self.target = target
-        self.baseTime = baseTime
+        self.baseTime: Arrow = arrow.get(baseTime)
+        self._baseTime = self.baseTime
         return self.extract()
 
     def pre(self):
@@ -51,8 +53,7 @@ class TimeNormalizer:
         logger.debug(f"清理空白符和语气助词以及大写数字转化的预处理 {self.target}")
 
     def extract(self) -> dict:
-        """返回 TimeUnit[] 时间表达式类型数组
-        """
+        """返回 TimeUnit[] 时间表达式类型数组"""
         self.pre()
         startline = -1
         endline = -1
