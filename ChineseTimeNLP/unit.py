@@ -207,7 +207,7 @@ class TimeUnit:
         pattern: Pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“凌晨”这种情况的处理
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了"凌晨"这种情况的处理
                 self.tp.hour = RangeTimeEnum.day_break
             elif 12 <= self.tp.hour <= 23:
                 self.tp.hour -= 12
@@ -221,7 +221,7 @@ class TimeUnit:
         pattern: Pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“早上/早晨/早间”这种情况的处理
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了"早上/早晨/早间"这种情况的处理
                 self.tp.hour = RangeTimeEnum.early_morning
                 # 处理倾向于未来时间的情况
             elif 12 <= self.tp.hour <= 23:
@@ -235,7 +235,7 @@ class TimeUnit:
         pattern: Pattern = re.compile(rule)
         match = pattern.search(self.exp_time)
         if match is not None:
-            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“上午”这种情况的处理
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了"上午"这种情况的处理
                 self.tp.hour = RangeTimeEnum.morning
             elif 12 <= self.tp.hour <= 23:
                 self.tp.hour -= 12
@@ -251,7 +251,7 @@ class TimeUnit:
         if match is not None:
             if 0 <= self.tp.hour <= 10:
                 self.tp.hour += 12
-            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“中午/午间”这种情况的处理
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了"中午/午间"这种情况的处理
                 self.tp.hour = RangeTimeEnum.noon
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
@@ -263,7 +263,7 @@ class TimeUnit:
         if match is not None:
             if 0 <= self.tp.hour <= 11:
                 self.tp.hour += 12
-            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了“下午|午后”这种情况的处理
+            if self.tp.hour == -1:  # 增加对没有明确时间点，只写了"下午|午后"这种情况的处理
                 self.tp.hour = RangeTimeEnum.afternoon
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
@@ -277,7 +277,7 @@ class TimeUnit:
                 self.tp.hour += 12
             elif self.tp.hour == 12:
                 self.tp.hour = 0
-            elif self.tp.hour == -1:  # 增加对没有明确时间点，只写了“下午|午后”这种情况的处理
+            elif self.tp.hour == -1:  # 增加对没有明确时间点，只写了"下午|午后"这种情况的处理
                 self.tp.hour = RangeTimeEnum.lateNight
             # 处理倾向于未来时间的情况
             self.preferFuture(3)
@@ -342,7 +342,7 @@ class TimeUnit:
 
     def norm_setsecond(self):
         """
-        添加了省略“秒”说法的时间：如17点15分32
+        添加了省略"秒"说法的时间：如17点15分32
         """
         rule = r"([0-9]+(?=秒))|((?<=分)[0-5]?[0-9])"
         pattern: Pattern = re.compile(rule)
@@ -362,46 +362,7 @@ class TimeUnit:
             rule = r"([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9]"
             pattern: Pattern = re.compile(rule)
             match = pattern.search(self.exp_time)
-            tmp_target = match.group()
-            tmp_parser = tmp_target.split(":")
-            if 0 <= int(tmp_parser[0]) <= 11:
-                self.tp.hour = int(tmp_parser[0]) + 12
-            else:
-                self.tp.hour = int(tmp_parser[0])
-
-            self.tp.minute = int(tmp_parser[1])
-            self.tp.second = int(tmp_parser[2])
-            # 处理倾向于未来时间的情况
-            self.preferFuture(3)
-            self.isAllDayTime = False
-
-        else:
-            rule = r"(晚上|夜间|夜里|今晚|明晚|晚|夜里|下午|午后)(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9]"
-            pattern: Pattern = re.compile(rule)
-            match = pattern.search(self.exp_time)
             if match is not None:
-                rule = r"([0-2]?[0-9]):[0-5]?[0-9]"
-                pattern: Pattern = re.compile(rule)
-                match = pattern.search(self.exp_time)
-                tmp_target = match.group()
-                tmp_parser = tmp_target.split(":")
-                if 0 <= int(tmp_parser[0]) <= 11:
-                    self.tp.hour = int(tmp_parser[0]) + 12
-                else:
-                    self.tp.hour = int(tmp_parser[0])
-                self.tp.minute = int(tmp_parser[1])
-                # 处理倾向于未来时间的情况
-                self.preferFuture(3)
-                self.isAllDayTime = False
-
-        if match is None:
-            rule = r"(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9](PM|pm|p\.m)"
-            pattern: Pattern = re.compile(rule, re.I)
-            match = pattern.search(self.exp_time)
-            if match is not None:
-                rule = r"([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9]"
-                pattern: Pattern = re.compile(rule)
-                match = pattern.search(self.exp_time)
                 tmp_target = match.group()
                 tmp_parser = tmp_target.split(":")
                 if 0 <= int(tmp_parser[0]) <= 11:
@@ -415,14 +376,15 @@ class TimeUnit:
                 self.preferFuture(3)
                 self.isAllDayTime = False
 
-            else:
-                rule = r"(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9](PM|pm|p.m)"
-                pattern: Pattern = re.compile(rule, re.I)
+        else:
+            rule = r"(晚上|夜间|夜里|今晚|明晚|晚|夜里|下午|午后)(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9]"
+            pattern: Pattern = re.compile(rule)
+            match = pattern.search(self.exp_time)
+            if match is not None:
+                rule = r"([0-2]?[0-9]):[0-5]?[0-9]"
+                pattern: Pattern = re.compile(rule)
                 match = pattern.search(self.exp_time)
                 if match is not None:
-                    rule = r"([0-2]?[0-9]):[0-5]?[0-9]"
-                    pattern: Pattern = re.compile(rule)
-                    match = pattern.search(self.exp_time)
                     tmp_target = match.group()
                     tmp_parser = tmp_target.split(":")
                     if 0 <= int(tmp_parser[0]) <= 11:
@@ -433,6 +395,48 @@ class TimeUnit:
                     # 处理倾向于未来时间的情况
                     self.preferFuture(3)
                     self.isAllDayTime = False
+
+        if match is None:
+            rule = r"(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9](PM|pm|p\.m)"
+            pattern: Pattern = re.compile(rule, re.I)
+            match = pattern.search(self.exp_time)
+            if match is not None:
+                rule = r"([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9]"
+                pattern: Pattern = re.compile(rule)
+                match = pattern.search(self.exp_time)
+                if match is not None:
+                    tmp_target = match.group()
+                    tmp_parser = tmp_target.split(":")
+                    if 0 <= int(tmp_parser[0]) <= 11:
+                        self.tp.hour = int(tmp_parser[0]) + 12
+                    else:
+                        self.tp.hour = int(tmp_parser[0])
+
+                    self.tp.minute = int(tmp_parser[1])
+                    self.tp.second = int(tmp_parser[2])
+                    # 处理倾向于未来时间的情况
+                    self.preferFuture(3)
+                    self.isAllDayTime = False
+
+            else:
+                rule = r"(?<!(周|星期))([0-2]?[0-9]):[0-5]?[0-9](PM|pm|p.m)"
+                pattern: Pattern = re.compile(rule, re.I)
+                match = pattern.search(self.exp_time)
+                if match is not None:
+                    rule = r"([0-2]?[0-9]):[0-5]?[0-9]"
+                    pattern: Pattern = re.compile(rule)
+                    match = pattern.search(self.exp_time)
+                    if match is not None:
+                        tmp_target = match.group()
+                        tmp_parser = tmp_target.split(":")
+                        if 0 <= int(tmp_parser[0]) <= 11:
+                            self.tp.hour = int(tmp_parser[0]) + 12
+                        else:
+                            self.tp.hour = int(tmp_parser[0])
+                        self.tp.minute = int(tmp_parser[1])
+                        # 处理倾向于未来时间的情况
+                        self.preferFuture(3)
+                        self.isAllDayTime = False
 
         if match is None:
             rule = r"(?<!(周|星期|晚上|夜间|夜里|今晚|明晚|晚|夜里|下午|午后))([0-2]?[0-9]):[0-5]?[0-9]:[0-5]?[0-9]"
@@ -1024,8 +1028,8 @@ class TimeUnit:
     def preferFuture(self, checkTimeIndex):
         """
         如果用户选项是倾向于未来时间，检查checkTimeIndex所指的时间是否是过去的时间，如果是的话，将大一级的时间设为当前时间的+1。
-        如在晚上说“早上8点看书”，则识别为明天早上;
-        12月31日说“3号买菜”，则识别为明年1月的3号。
+        如在晚上说"早上8点看书"，则识别为明天早上;
+        12月31日说"3号买菜"，则识别为明年1月的3号。
         :param checkTimeIndex: _tp.tunit时间数组的下标
         """
         # 1. 检查被检查的时间级别之前，是否没有更高级的已经确定的时间，如果有，则不进行处理.
