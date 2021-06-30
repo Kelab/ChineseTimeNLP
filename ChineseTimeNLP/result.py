@@ -21,6 +21,10 @@ class Result(dict):
         return Error(error="no time pattern could be extracted.")
 
     @staticmethod
+    def from_exception(e: Exception) -> "Error":
+        return Error(error=str(e))
+
+    @staticmethod
     def from_timedelta(delta_dict: DeltaType) -> "Delta":
         logger.debug(f"time_delta: {delta_dict}")
         return Delta(delta_dict)

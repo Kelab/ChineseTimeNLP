@@ -60,7 +60,6 @@ class TimeNormalizer:
         endline = -1
         rpointer = 0
         temp = []
-
         match = self.pattern.finditer(self.target)
         logger.debug("=======")
         logger.debug("用正则提取关键字：")
@@ -77,29 +76,31 @@ class TimeNormalizer:
             rpointer += 1
         logger.debug("=======")
 
-        res: List[TimeUnit] = []
-        # 时间上下文： 前一个识别出来的时间会是下一个时间的上下文，用于处理：周六3点到5点这样的多个时间的识别，第二个5点应识别到是周六的。
-        contextTp = TimePoint()
+        try:
+            res: List[TimeUnit] = []
+            # 时间上下文： 前一个识别出来的时间会是下一个时间的上下文，用于处理：周六3点到5点这样的多个时间的识别，第二个5点应识别到是周六的。
+            contextTp = TimePoint()
 
-        logger.debug(f"基础时间： {self.baseTime}")
-        logger.debug(f"待处理的字段: {temp}")
-        logger.debug(f"待处理字段长度: {rpointer}")
-        for i in range(0, rpointer):
-            # 这里是一个类嵌套了一个类
-            res.append(TimeUnit(temp[i], self, contextTp))
-            contextTp = res[i].tp
+            logger.debug(f"基础时间： {self.baseTime}")
+            logger.debug(f"待处理的字段: {temp}")
+            logger.debug(f"待处理字段长度: {rpointer}")
+            for i in range(0, rpointer):
+                # 这里是一个类嵌套了一个类
+                res.append(TimeUnit(temp[i], self, contextTp))
+                contextTp = res[i].tp
 
-        logger.debug(f"全部字段处理后的结果： {res}")
-        res = self.filter(res)
+            logger.debug(f"全部字段处理后的结果： {res}")
+            res = self.filter(res)
 
-        if self.isTimeDelta and self.timeDelta:
-            return Result.from_timedelta(self.timeDelta)
-        if len(res) == 1:
-            return Result.from_timestamp(res)
-        if len(res) == 2:
-            return Result.from_timespan(res)
-
-        return Result.from_invalid()
+            if self.isTimeDelta and self.timeDelta:
+                return Result.from_timedelta(self.timeDelta)
+            if len(res) == 1:
+                return Result.from_timestamp(res)
+            if len(res) == 2:
+                return Result.from_timespan(res)
+            return Result.from_invalid()
+        except Exception as e:
+            return Result.from_exception(e)
 
     def filter(self, tu_arr: List[TimeUnit]):
         """
