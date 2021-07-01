@@ -100,6 +100,7 @@ class TimeNormalizer:
                 return Result.from_timespan(res)
             return Result.from_invalid()
         except Exception as e:
+            logger.opt(exception=e).debug("解析时发生错误")
             return Result.from_exception(e)
 
     def filter(self, tu_arr: List[TimeUnit]):
@@ -111,7 +112,7 @@ class TimeNormalizer:
             if not tu:
                 continue
 
-            if tu.time.timestamp != 0:
+            if tu.time.int_timestamp != 0:
                 res.append(tu)
         logger.debug(f"过滤无效识别后： {res}")
         return res

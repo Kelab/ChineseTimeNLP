@@ -1009,6 +1009,7 @@ class TimeUnit:
                 else:
                     arr.append(self.tp.tunit[i])
             self.normalizer.baseTime = tp2arrow(arr)
+            logger.debug(f"更新baseTime使之具有上下文关联性: {self.normalizer.baseTime}")
 
     def preferFutureWeek(self, weekday, cur):
         # 1. 确认用户选项
