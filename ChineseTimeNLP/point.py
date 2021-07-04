@@ -69,13 +69,11 @@ class TimePoint:
         self.tunit[5] = value
 
     def is_valid(self):
-        flag = 0
+        """只要有一个 unit 大于 0，就说明有效"""
         for i in self.tunit:
-            if i > 0:
-                flag = 1
+            if i >= 0:
                 return True
-        if flag == 0:
-            return False
+        return False
 
     def gen_delta(self) -> DeltaType:
         return {
